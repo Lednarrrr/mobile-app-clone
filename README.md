@@ -1,8 +1,10 @@
-# Welcome to your Expo app 👋
+# Kusinera
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Tagline:** Luto nang matalino.
 
-## Get started
+Kusinera is an offline-first Android prototype for Filipino karinderya owners. It helps users manage ingredient inventory, recommend Filipino dishes based on available ingredients, show missing ingredients, and generate a shopping list.
+
+## Step 1: Project Setup
 
 1. Install dependencies
 
@@ -13,38 +15,37 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 2. Start the app
 
    ```bash
-   npx expo start
+   npm start
    ```
 
-In the output, you'll find options to open the app in a
+3. Open on Android
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+   ```bash
+   npm run android
+   ```
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Folder Structure
 
-## Get a fresh project
+- `app/` - Expo Router navigation files.
+- `src/screens/` - Full app screens like inventory, recommendations, shopping list, privacy, and settings.
+- `src/components/` - Reusable buttons, cards, inputs, and UI pieces.
+- `src/database/` - SQLite setup and inventory queries.
+- `src/data/` - Bundled offline data such as `recipes.json` and ingredient synonyms.
+- `src/logic/` - Business logic such as the recommendation engine.
+- `src/utils/` - Small helper functions shared across the app.
+- `assets/` - Images, icons, splash screen, and fonts.
 
-When you're ready, run:
+## MVP Scope
 
-```bash
-npm run reset-project
-```
+- Inventory add, edit, and delete.
+- Offline recipe recommendations.
+- Missing ingredients per dish.
+- Shopping list generation.
+- Android-first testing.
+- First-launch data privacy declaration.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Beginner Notes
 
-## Learn more
+This project uses Expo Router, which means files inside `app/` become screens. Most feature code should live inside `src/`, then route files can import those screens.
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+For the MVP, keep the app offline. Do not add login, Supabase, payments, barcode scanning, or image recognition yet.
