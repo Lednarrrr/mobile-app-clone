@@ -2,7 +2,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 import { NAV_ITEMS } from "../constants";
 
-export default function BottomNavigation({ activeScreen, onChangeScreen, onAddPress }) {
+export default function BottomNavigation({
+  activeScreen,
+  onChangeScreen,
+  onAddPress,
+}) {
   const leftItems = NAV_ITEMS.slice(0, 2);
   const rightItems = NAV_ITEMS.slice(2);
 
@@ -113,14 +117,16 @@ const styles = {
     alignItems: "center",
     backgroundColor: "#2D6A4F",
     borderRadius: 999,
-    height: 56,
+    borderWidth: 8,
+    borderColor: "#F8F5EE",
+    height: 68,
     justifyContent: "center",
     marginHorizontal: 12,
     shadowColor: "#111827",
-    shadowOpacity: 0.12,
-    shadowOffset: { width: 0, height: 8 },
-    shadowRadius: 12,
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 16,
     transform: [{ translateY: -22 }],
-    width: 56,
+    width: 68,
   },
 };

@@ -49,6 +49,11 @@ export default function App() {
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const [newItemName, setNewItemName] = useState("");
   const [newItemQty, setNewItemQty] = useState("");
   const [newItemUnit, setNewItemUnit] = useState("");
@@ -198,6 +203,9 @@ export default function App() {
     );
     loadIngredients();
     closeAddModal();
+    setToastMessage(`${newItemName} has been added to your inventory.`);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
   }
 
   function findClosestSynonym(value) {
@@ -245,6 +253,9 @@ export default function App() {
               onGoToInventory={() => setActiveScreen("inventory")}
               onGoToBuy={() => setActiveScreen("buy")}
               onGoToSettings={() => setActiveScreen("settings")}
+              onFilterPress={() => setIsFilterModalOpen(true)}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
             />
           )}
 
@@ -278,6 +289,13 @@ export default function App() {
           onChangeScreen={setActiveScreen}
           onAddPress={openAddModal}
         />
+
+        {showToast && (
+          <View style={styles.toast}>
+            <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
+            <Text style={styles.toastText}>{toastMessage}</Text>
+          </View>
+        )}
       </View>
 
       <Modal
@@ -458,6 +476,83 @@ export default function App() {
             </Pressable>
           </Animated.View>
         </Animated.View>
+      </Modal>
+
+      <Modal
+        animationType="none"
+        transparent
+        visible={isFilterModalOpen}
+        onRequestClose={() => setIsFilterModalOpen(false)}
+      >
+        <Pressable
+          style={styles.modalBackdrop}
+          onPress={() => setIsFilterModalOpen(false)}
+        >
+          <SafeAreaView
+            style={{ backgroundColor: "#ffffff" }}
+            edges={["bottom"]}
+          >
+            <Pressable style={styles.modalSheet}>
+              <View style={styles.modalHandle} />
+              <View style={styles.modalHeaderRow}>
+                <View style={styles.modalHeaderSpacer} />
+                <Text style={styles.modalTitle}>Filter Dishes</Text>
+                <Pressable
+                  style={styles.modalClose}
+                  onPress={() => setIsFilterModalOpen(false)}
+                >
+                  <Ionicons name="close" size={20} color="#111827" />
+                </Pressable>
+              </View>
+
+              <View style={styles.modalFieldGroup}>
+                <Text style={styles.modalFieldLabel}>Category</Text>
+                {CATEGORY_OPTIONS.map((category) => {
+                  const isSelected = selectedCategories.includes(category);
+                  return (
+                    <Pressable
+                      key={category}
+                      style={[
+                        styles.filterOption,
+                        isSelected && styles.filterOptionSelected,
+                      ]}
+                      onPress={() => {
+                        setSelectedCategories((prev) =>
+                          isSelected
+                            ? prev.filter((c) => c !== category)
+                            : [...prev, category],
+                        );
+                      }}
+                    >
+                      <Text style={styles.filterOptionText}>{category}</Text>
+                      <View
+                        style={[
+                          styles.checkbox,
+                          isSelected && styles.checkboxChecked,
+                        ]}
+                      >
+                        {isSelected && (
+                          <Ionicons
+                            name="checkmark"
+                            size={14}
+                            color="#ffffff"
+                          />
+                        )}
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              <Pressable
+                style={styles.modalPrimaryButton}
+                onPress={() => setIsFilterModalOpen(false)}
+              >
+                <Text style={styles.modalPrimaryText}>Apply Filters</Text>
+              </Pressable>
+            </Pressable>
+          </SafeAreaView>
+        </Pressable>
       </Modal>
     </SafeAreaView>
   );
@@ -758,5 +853,62 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 15,
     fontWeight: "900",
+  },
+  filterOption: {
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderColor: "#e5e7eb",
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  filterOptionSelected: {
+    borderColor: "#2D6A4F",
+    backgroundColor: "#f0fdf4",
+  },
+  filterOptionText: {
+    color: "#111827",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  checkbox: {
+    alignItems: "center",
+    backgroundColor: "#e5e7eb",
+    borderRadius: 6,
+    height: 22,
+    justifyContent: "center",
+    width: 22,
+  },
+  checkboxChecked: {
+    backgroundColor: "#2D6A4F",
+  },
+  toast: {
+    position: "absolute",
+    top: 20,
+    left: 16,
+    right: 16,
+    backgroundColor: "#E9C46A",
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    shadowColor: "#111827",
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
+    elevation: 4,
+    zIndex: 100,
+  },
+  toastText: {
+    color: "#111827",
+    fontSize: 14,
+    fontWeight: "600",
+    flex: 1,
   },
 });

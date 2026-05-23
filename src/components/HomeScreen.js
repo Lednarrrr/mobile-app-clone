@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { TOP_DISHES } from "../constants";
 import StatCard from "./StatCard";
 
@@ -12,6 +12,9 @@ export default function HomeScreen({
   onGoToInventory,
   onGoToBuy,
   onGoToSettings,
+  onFilterPress,
+  searchQuery,
+  onSearchChange,
 }) {
   return (
     <ScrollView
@@ -38,7 +41,16 @@ export default function HomeScreen({
 
         <View style={styles.searchBar}>
           <Ionicons name="search" size={18} color="#2D6A4F" />
-          <Text style={styles.searchPlaceholder}>Search</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search"
+            placeholderTextColor="#2D6A4F"
+            value={searchQuery}
+            onChangeText={onSearchChange}
+          />
+          <Pressable style={styles.filterButton} onPress={onFilterPress}>
+            <Ionicons name="options-outline" size={18} color="#2D6A4F" />
+          </Pressable>
         </View>
       </View>
 
@@ -143,12 +155,21 @@ const styles = {
     gap: 12,
     marginTop: 16,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 6,
   },
-  searchPlaceholder: {
+  searchInput: {
     color: "#2D6A4F",
     fontSize: 15,
     fontWeight: "600",
+    flex: 1,
+  },
+  filterButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(45, 106, 79, 0.1)",
+    borderRadius: 8,
+    height: 32,
+    justifyContent: "center",
+    width: 32,
   },
   statsGrid: {
     flexDirection: "row",

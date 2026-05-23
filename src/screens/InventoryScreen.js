@@ -1,26 +1,26 @@
-import { useState } from 'react';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useState } from "react";
 import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+    Alert,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
 
 import {
-  addIngredient,
-  deleteIngredient,
-  updateIngredient,
-} from '../database/inventoryDatabase';
-import { getCanonicalIngredientName } from '../utils/recommendationEngine';
+    addIngredient,
+    deleteIngredient,
+    updateIngredient,
+} from "../database/inventoryDatabase";
+import { getCanonicalIngredientName } from "../utils/recommendationEngine";
 
 function formatDate(date) {
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
 }
@@ -30,7 +30,7 @@ function parseDate(dateText) {
     return null;
   }
 
-  const [year, month, day] = dateText.split('-').map(Number);
+  const [year, month, day] = dateText.split("-").map(Number);
 
   if (!year || !month || !day) {
     return null;
@@ -55,35 +55,38 @@ function isBeforeToday(dateText) {
 
 export default function InventoryScreen({ ingredients, onInventoryChange }) {
   const [editingIngredientId, setEditingIngredientId] = useState(null);
-  const [name, setName] = useState('');
-  const [quantity, setQuantity] = useState('');
-  const [unit, setUnit] = useState('');
-  const [category, setCategory] = useState('');
-  const [expiryDate, setExpiryDate] = useState('');
+  const [name, setName] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [unit, setUnit] = useState("");
+  const [category, setCategory] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
   const [showExpiryPicker, setShowExpiryPicker] = useState(false);
 
   const isEditing = editingIngredientId !== null;
 
   function resetForm() {
     setEditingIngredientId(null);
-    setName('');
-    setQuantity('');
-    setUnit('');
-    setCategory('');
-    setExpiryDate('');
+    setName("");
+    setQuantity("");
+    setUnit("");
+    setCategory("");
+    setExpiryDate("");
     setShowExpiryPicker(false);
   }
 
   function handleAddIngredient() {
     if (!name.trim()) {
-      Alert.alert('Missing ingredient name', 'Please enter an ingredient name.');
+      Alert.alert(
+        "Missing ingredient name",
+        "Please enter an ingredient name.",
+      );
       return;
     }
 
     if (expiryDate && isBeforeToday(expiryDate)) {
       Alert.alert(
-        'Invalid expiry date',
-        'Please choose today or a future date for the ingredient expiry.'
+        "Invalid expiry date",
+        "Please choose today or a future date for the ingredient expiry.",
       );
       return;
     }
@@ -95,7 +98,7 @@ export default function InventoryScreen({ ingredients, onInventoryChange }) {
         quantity,
         unit,
         category,
-        expiryDate
+        expiryDate,
       );
     } else {
       addIngredient(name, quantity, unit, category, expiryDate);
@@ -111,25 +114,25 @@ export default function InventoryScreen({ ingredients, onInventoryChange }) {
     setQuantity(
       ingredient.quantity !== null && ingredient.quantity !== undefined
         ? String(ingredient.quantity)
-        : ''
+        : "",
     );
-    setUnit(ingredient.unit || '');
-    setCategory(ingredient.category || '');
-    setExpiryDate(ingredient.expiry_date || '');
+    setUnit(ingredient.unit || "");
+    setCategory(ingredient.category || "");
+    setExpiryDate(ingredient.expiry_date || "");
   }
 
   function handleDeleteIngredient(id) {
     Alert.alert(
-      'Delete ingredient?',
-      'This removes the ingredient from your local inventory.',
+      "Delete ingredient?",
+      "This removes the ingredient from your local inventory.",
       [
         {
-          text: 'Cancel',
-          style: 'cancel',
+          text: "Cancel",
+          style: "cancel",
         },
         {
-          text: 'Delete',
-          style: 'destructive',
+          text: "Delete",
+          style: "destructive",
           onPress: () => {
             if (editingIngredientId === id) {
               resetForm();
@@ -139,14 +142,14 @@ export default function InventoryScreen({ ingredients, onInventoryChange }) {
             onInventoryChange();
           },
         },
-      ]
+      ],
     );
   }
 
   function handleExpiryDateChange(event, selectedDate) {
     setShowExpiryPicker(false);
 
-    if (event.type === 'dismissed' || !selectedDate) {
+    if (event.type === "dismissed" || !selectedDate) {
       return;
     }
 
@@ -162,13 +165,15 @@ export default function InventoryScreen({ ingredients, onInventoryChange }) {
       <View style={styles.sectionHeader}>
         <View>
           <Text style={styles.title}>Pantry stock</Text>
-          <Text style={styles.subtitle}>Add the ingredients available today.</Text>
+          <Text style={styles.subtitle}>
+            Add the ingredients available today.
+          </Text>
         </View>
       </View>
 
       <View style={styles.form}>
         <Text style={styles.formTitle}>
-          {isEditing ? 'Edit ingredient' : 'New ingredient'}
+          {isEditing ? "Edit ingredient" : "New ingredient"}
         </Text>
 
         <TextInput
@@ -211,10 +216,8 @@ export default function InventoryScreen({ ingredients, onInventoryChange }) {
             style={[styles.input, styles.rowInput, styles.dateInput]}
             onPress={() => setShowExpiryPicker(true)}
           >
-            <Text
-              style={expiryDate ? styles.dateText : styles.datePlaceholder}
-            >
-              {expiryDate || 'Expiry date'}
+            <Text style={expiryDate ? styles.dateText : styles.datePlaceholder}>
+              {expiryDate || "Expiry date"}
             </Text>
           </Pressable>
         </View>
@@ -222,7 +225,7 @@ export default function InventoryScreen({ ingredients, onInventoryChange }) {
         {expiryDate && (
           <Pressable
             style={styles.clearDateButton}
-            onPress={() => setExpiryDate('')}
+            onPress={() => setExpiryDate("")}
           >
             <Text style={styles.clearDateText}>Clear expiry date</Text>
           </Pressable>
@@ -240,7 +243,7 @@ export default function InventoryScreen({ ingredients, onInventoryChange }) {
 
         <Pressable style={styles.primaryButton} onPress={handleAddIngredient}>
           <Text style={styles.primaryButtonText}>
-            {isEditing ? 'Save changes' : 'Add to inventory'}
+            {isEditing ? "Save changes" : "Add to inventory"}
           </Text>
         </Pressable>
 
@@ -276,13 +279,13 @@ export default function InventoryScreen({ ingredients, onInventoryChange }) {
             <View style={styles.ingredientInfo}>
               <Text style={styles.ingredientName}>{ingredient.name}</Text>
               <Text style={styles.ingredientDetails}>
-                {ingredient.quantity || 'No quantity'} {ingredient.unit || ''}
+                {ingredient.quantity || "No quantity"} {ingredient.unit || ""}
               </Text>
               <Text style={styles.metaText}>
-                {ingredient.category || 'Uncategorized'}
+                {ingredient.category || "Uncategorized"}
                 {ingredient.expiry_date
                   ? ` | Expires ${ingredient.expiry_date}`
-                  : ' | No expiry date'}
+                  : " | No expiry date"}
               </Text>
               {getCanonicalIngredientName(ingredient.name) !==
                 ingredient.name.trim().toLowerCase() && (
@@ -317,209 +320,211 @@ export default function InventoryScreen({ ingredients, onInventoryChange }) {
 const styles = StyleSheet.create({
   content: {
     paddingBottom: 28,
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
   sectionHeader: {
     marginBottom: 14,
   },
   title: {
-    color: '#1c2a22',
+    color: "#1c2a22",
     fontSize: 23,
-    fontWeight: '900',
+    fontWeight: "900",
   },
   subtitle: {
-    color: '#69746c',
+    color: "#69746c",
     fontSize: 14,
     lineHeight: 20,
     marginTop: 3,
   },
   form: {
-    backgroundColor: '#ffffff',
-    borderColor: '#eadfcb',
+    backgroundColor: "#ffffff",
+    borderColor: "#eadfcb",
     borderRadius: 8,
     borderWidth: 1,
     marginBottom: 20,
     padding: 16,
   },
   formTitle: {
-    color: '#1c2a22',
+    color: "#1c2a22",
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: "900",
     marginBottom: 12,
   },
   input: {
-    backgroundColor: '#fbfaf7',
-    borderColor: '#e1d8c9',
+    backgroundColor: "#fbfaf7",
+    borderColor: "#e1d8c9",
     borderRadius: 8,
     borderWidth: 1,
-    color: '#1c2a22',
+    color: "#1c2a22",
     fontSize: 16,
     marginBottom: 10,
     paddingHorizontal: 13,
     paddingVertical: 12,
   },
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 10,
   },
   rowInput: {
     flex: 1,
   },
   dateInput: {
-    justifyContent: 'center',
+    justifyContent: "center",
     minHeight: 50,
   },
   dateText: {
-    color: '#1c2a22',
+    color: "#1c2a22",
     fontSize: 16,
   },
   datePlaceholder: {
-    color: '#9a9f98',
+    color: "#9a9f98",
     fontSize: 16,
   },
   clearDateButton: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginBottom: 12,
   },
   clearDateText: {
-    color: '#b35f2b',
+    color: "#b35f2b",
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: "900",
   },
   primaryButton: {
-    alignItems: 'center',
-    backgroundColor: '#1f6a45',
+    alignItems: "center",
+    backgroundColor: "#1f6a45",
     borderRadius: 8,
     marginTop: 2,
     paddingVertical: 13,
   },
   primaryButtonText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: "900",
   },
   secondaryButton: {
-    alignItems: 'center',
-    backgroundColor: '#f1eadf',
+    alignItems: "center",
+    backgroundColor: "#f1eadf",
     borderRadius: 8,
     marginTop: 10,
     paddingVertical: 12,
   },
   secondaryButtonText: {
-    color: '#5f655f',
+    color: "#5f655f",
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: "900",
   },
   listHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 10,
   },
   sectionTitle: {
-    color: '#1c2a22',
+    color: "#1c2a22",
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: "900",
   },
   countBadge: {
-    backgroundColor: '#e1f3e7',
+    backgroundColor: "#e1f3e7",
     borderRadius: 8,
-    color: '#1f6a45',
+    color: "#1f6a45",
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: "900",
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
   emptyPanel: {
-    backgroundColor: '#ffffff',
-    borderColor: '#eadfcb',
+    backgroundColor: "#ffffff",
+    borderColor: "#eadfcb",
     borderRadius: 8,
     borderWidth: 1,
     padding: 18,
   },
   emptyTitle: {
-    color: '#1c2a22',
+    color: "#1c2a22",
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: "900",
     marginBottom: 5,
   },
   emptyText: {
-    color: '#69746c',
+    color: "#69746c",
     fontSize: 15,
     lineHeight: 21,
   },
   ingredientCard: {
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderColor: '#eadfcb',
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderColor: "#eadfcb",
     borderRadius: 8,
     borderWidth: 1,
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
     marginBottom: 10,
     padding: 13,
   },
   ingredientAvatar: {
-    alignItems: 'center',
-    backgroundColor: '#fff0d0',
+    alignItems: "center",
+    backgroundColor: "#fff0d0",
     borderRadius: 8,
     height: 42,
-    justifyContent: 'center',
+    justifyContent: "center",
     width: 42,
   },
   ingredientInitial: {
-    color: '#9a5b13',
+    color: "#9a5b13",
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: "900",
   },
   ingredientInfo: {
     flex: 1,
   },
   ingredientName: {
-    color: '#1c2a22',
+    color: "#1c2a22",
     fontSize: 17,
-    fontWeight: '900',
-    textTransform: 'capitalize',
+    fontWeight: "900",
+    textTransform: "capitalize",
   },
   ingredientDetails: {
-    color: '#69746c',
+    color: "#69746c",
     fontSize: 13,
     marginTop: 3,
   },
   metaText: {
-    color: '#7a8179',
+    color: "#7a8179",
     fontSize: 12,
     marginTop: 3,
   },
   synonymText: {
-    color: '#1f6a45',
+    color: "#1f6a45",
     fontSize: 12,
-    fontWeight: '800',
+    fontWeight: "800",
     marginTop: 3,
   },
   actionGroup: {
     gap: 8,
   },
   editButton: {
-    backgroundColor: '#e1f3e7',
+    backgroundColor: "#e1f3e7",
     borderRadius: 8,
     paddingHorizontal: 11,
     paddingVertical: 8,
   },
   editButtonText: {
-    color: '#1f6a45',
+    color: "#1f6a45",
     fontSize: 12,
-    fontWeight: '900',
-    textAlign: 'center',
+    fontWeight: "900",
+    textAlign: "center",
   },
   deleteButton: {
-    backgroundColor: '#fff3f0',
+    backgroundColor: "#fff3f0",
     borderRadius: 8,
     paddingHorizontal: 11,
     paddingVertical: 8,
   },
   deleteButtonText: {
-    color: '#b6402e',
+    color: "#b6402e",
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: "900",
   },
 });
