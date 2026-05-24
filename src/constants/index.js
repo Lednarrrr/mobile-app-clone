@@ -2,7 +2,7 @@ export const NAV_ITEMS = [
   { key: "home", label: "Home", icon: "home-outline" },
   { key: "inventory", label: "Inventory", icon: "archive-outline" },
   { key: "cook", label: "Cook", icon: "restaurant-outline" },
-  { key: "buy", label: "Profile", icon: "person-outline" },
+  { key: "profile", label: "Profile", icon: "person-outline" },
 ];
 
 export const TOP_DISHES = [

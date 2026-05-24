@@ -32,9 +32,21 @@ export default function HomeScreen({
               Traditional Filipino kitchen assistant
             </Text>
           </View>
-          <Pressable style={styles.notificationButton} onPress={onGoToSettings}>
-            <Ionicons name="notifications-outline" size={20} color="#ffffff" />
-          </Pressable>
+          <View style={styles.headerActions}>
+            <Pressable style={styles.shoppingButton} onPress={onGoToBuy}>
+              <Ionicons name="cart-outline" size={20} color="#ffffff" />
+            </Pressable>
+            <Pressable
+              style={styles.notificationButton}
+              onPress={onGoToSettings}
+            >
+              <Ionicons
+                name="notifications-outline"
+                size={20}
+                color="#ffffff"
+              />
+            </Pressable>
+          </View>
         </View>
 
         <Text style={styles.greeting}>Magandang Araw, Guest</Text>
@@ -134,6 +146,19 @@ const styles = {
     opacity: 0.8,
   },
   notificationButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 999,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
+  },
+  headerActions: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  shoppingButton: {
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 999,

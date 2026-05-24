@@ -26,6 +26,7 @@ import {
   initInventoryDatabase,
 } from "./src/database/inventoryDatabase";
 import InventoryScreen from "./src/screens/InventoryScreen";
+import ProfileScreen from "./src/screens/ProfileScreen";
 import RecommendationScreen from "./src/screens/RecommendationScreen";
 import {
   getRecipeRecommendations,
@@ -273,6 +274,8 @@ export default function App() {
           {activeScreen === "buy" && (
             <ShoppingList shoppingList={shoppingList} />
           )}
+
+          {activeScreen === "profile" && <ProfileScreen />}
 
           {activeScreen === "settings" && (
             <SettingsPanel
@@ -558,6 +561,37 @@ export default function App() {
   );
 }
 
+function SettingsPanel({ onResetOnboarding }) {
+  return (
+    <ScrollView
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.sectionHeader}>
+        <Text style={styles.screenTitle}>Settings</Text>
+        <Text style={styles.screenSubtitle}>
+          MVP controls for privacy, offline data, and future app preferences.
+        </Text>
+      </View>
+
+      <View style={styles.settingsCard}>
+        <Ionicons name="shield-checkmark-outline" size={28} color="#2D6A4F" />
+        <View style={styles.settingsTextGroup}>
+          <Text style={styles.settingsTitle}>Offline-first prototype</Text>
+          <Text style={styles.settingsText}>
+            Inventory data is stored locally on this device for the MVP.
+          </Text>
+        </View>
+      </View>
+
+      <Pressable style={styles.settingsAction} onPress={onResetOnboarding}>
+        <Ionicons name="refresh-outline" size={22} color="#C77B12" />
+        <Text style={styles.settingsActionText}>Show onboarding again</Text>
+      </Pressable>
+    </ScrollView>
+  );
+}
+
 function ShoppingList({ shoppingList }) {
   return (
     <ScrollView
@@ -592,37 +626,6 @@ function ShoppingList({ shoppingList }) {
           </View>
         ))
       )}
-    </ScrollView>
-  );
-}
-
-function SettingsPanel({ onResetOnboarding }) {
-  return (
-    <ScrollView
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.sectionHeader}>
-        <Text style={styles.screenTitle}>Settings</Text>
-        <Text style={styles.screenSubtitle}>
-          MVP controls for privacy, offline data, and future app preferences.
-        </Text>
-      </View>
-
-      <View style={styles.settingsCard}>
-        <Ionicons name="shield-checkmark-outline" size={28} color="#2D6A4F" />
-        <View style={styles.settingsTextGroup}>
-          <Text style={styles.settingsTitle}>Offline-first prototype</Text>
-          <Text style={styles.settingsText}>
-            Inventory data is stored locally on this device for the MVP.
-          </Text>
-        </View>
-      </View>
-
-      <Pressable style={styles.settingsAction} onPress={onResetOnboarding}>
-        <Ionicons name="refresh-outline" size={22} color="#C77B12" />
-        <Text style={styles.settingsActionText}>Show onboarding again</Text>
-      </Pressable>
     </ScrollView>
   );
 }
@@ -666,6 +669,115 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     marginTop: 0,
+  },
+  scrollContent: {
+    paddingBottom: 120,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+  },
+  sectionHeader: {
+    marginBottom: 16,
+  },
+  screenTitle: {
+    color: "#111827",
+    fontSize: 22,
+    fontWeight: "900",
+  },
+  screenSubtitle: {
+    color: "#6b7280",
+    fontSize: 13,
+    marginTop: 6,
+  },
+  settingsCard: {
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderColor: "#e5e7eb",
+    borderRadius: 16,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    padding: 16,
+  },
+  settingsTextGroup: {
+    flex: 1,
+  },
+  settingsTitle: {
+    color: "#111827",
+    fontSize: 15,
+    fontWeight: "800",
+  },
+  settingsText: {
+    color: "#6b7280",
+    fontSize: 13,
+    marginTop: 4,
+  },
+  settingsAction: {
+    alignItems: "center",
+    backgroundColor: "#fff7ed",
+    borderColor: "#fed7aa",
+    borderRadius: 14,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  settingsActionText: {
+    color: "#9a3412",
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  shoppingItem: {
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderColor: "#e5e7eb",
+    borderRadius: 16,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 12,
+    padding: 14,
+  },
+  shoppingIcon: {
+    alignItems: "center",
+    backgroundColor: "#e8f3ee",
+    borderRadius: 999,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
+  },
+  shoppingInfo: {
+    flex: 1,
+  },
+  shoppingName: {
+    color: "#111827",
+    fontSize: 15,
+    fontWeight: "800",
+  },
+  shoppingMeta: {
+    color: "#6b7280",
+    fontSize: 12,
+    marginTop: 4,
+  },
+  emptyPanel: {
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderColor: "#e5e7eb",
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 18,
+  },
+  emptyTitle: {
+    color: "#111827",
+    fontSize: 15,
+    fontWeight: "800",
+  },
+  emptyText: {
+    color: "#6b7280",
+    fontSize: 12,
+    marginTop: 6,
+    textAlign: "center",
   },
   modalBackdrop: {
     backgroundColor: "rgba(17, 24, 39, 0.35)",

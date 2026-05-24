@@ -44,6 +44,28 @@ Kusinera is an offline-first Android prototype for Filipino karinderya owners. I
 - Android-first testing.
 - First-launch data privacy declaration.
 
+## Feature 2: Recipe Recommendation (ML)
+
+Core AI/ML contribution: a content-based filtering pipeline that uses TF-IDF weighting
+and cosine similarity to match the user's inventory against a bundled Filipino recipe
+database.
+
+### How it works
+
+- Ingredient synonym normalization (original contribution): maps Filipino ingredient
+   names to canonical names (e.g., baboy -> pork belly, bawang -> garlic).
+- Match score computation: Score = (Matching Ingredients / Total Required) x 100.
+- Three-tier result display:
+   - 80% and above: Ready to cook
+   - 50-79%: Almost there
+   - Below 50%: Hidden
+- Filter recommendations by dish category: Ulam, Sabaw, Prito, Gulay, Ihaw.
+
+### Offline data
+
+- Pre-loaded database of 100 Filipino karinderya dishes (offline).
+- Generated via an LLM pipeline and bundled as `recipes.json` inside the app.
+
 ## Beginner Notes
 
 This project uses Expo Router, which means files inside `app/` become screens. Most feature code should live inside `src/`, then route files can import those screens.
