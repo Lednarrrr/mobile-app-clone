@@ -1104,7 +1104,7 @@ const styles = StyleSheet.create({
 
   // --- SHOPPING LIST STYLES (Your custom header tweaks) ---
   shoppingHeader: {
-    backgroundColor: "#05943c", 
+    backgroundColor: "#2D6A4F", 
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 40,
