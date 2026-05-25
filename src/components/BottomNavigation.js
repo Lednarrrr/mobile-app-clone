@@ -13,28 +13,37 @@ export default function BottomNavigation({
   return (
     <View style={styles.bottomNav}>
       <View style={styles.navGroup}>
-        {leftItems.map((item) => {
-          const isActive = activeScreen === item.key;
+        {leftItems.map((item) => (
+          <Pressable
+            key={item.key}
+            style={({ hovered }) => [
+              styles.navButton,
+              (activeScreen === item.key || hovered) && styles.activeNavButton,
+            ]}
+            onPress={() => onChangeScreen(item.key)}
+          >
+            {({ hovered }) => {
+              const isActive = activeScreen === item.key;
+              const isHighlighted = isActive || hovered;
+              const filledIcon = item.icon.replace("-outline", "");
 
-          return (
-            <Pressable
-              key={item.key}
-              style={[styles.navButton, isActive && styles.activeNavButton]}
-              onPress={() => onChangeScreen(item.key)}
-            >
-              <Ionicons
-                name={item.icon}
-                size={22}
-                color={isActive ? "#2D6A4F" : "#8b8f97"}
-              />
-              <Text
-                style={[styles.navLabel, isActive && styles.activeNavLabel]}
-              >
-                {item.label}
-              </Text>
-            </Pressable>
-          );
-        })}
+              return (
+                <>
+                  <Ionicons
+                    name={isHighlighted ? filledIcon : item.icon}
+                    size={22}
+                    color={isHighlighted ? "#2D6A4F" : "#8b8f97"}
+                  />
+                  <Text
+                    style={[styles.navLabel, isHighlighted && styles.activeNavLabel]}
+                  >
+                    {item.label}
+                  </Text>
+                </>
+              );
+            }}
+          </Pressable>
+        ))}
       </View>
 
       <Pressable style={styles.centerAction} onPress={onAddPress}>
@@ -42,28 +51,37 @@ export default function BottomNavigation({
       </Pressable>
 
       <View style={styles.navGroup}>
-        {rightItems.map((item) => {
-          const isActive = activeScreen === item.key;
+        {rightItems.map((item) => (
+          <Pressable
+            key={item.key}
+            style={({ hovered }) => [
+              styles.navButton,
+              (activeScreen === item.key || hovered) && styles.activeNavButton,
+            ]}
+            onPress={() => onChangeScreen(item.key)}
+          >
+            {({ hovered }) => {
+              const isActive = activeScreen === item.key;
+              const isHighlighted = isActive || hovered;
+              const filledIcon = item.icon.replace("-outline", "");
 
-          return (
-            <Pressable
-              key={item.key}
-              style={[styles.navButton, isActive && styles.activeNavButton]}
-              onPress={() => onChangeScreen(item.key)}
-            >
-              <Ionicons
-                name={item.icon}
-                size={22}
-                color={isActive ? "#2D6A4F" : "#8b8f97"}
-              />
-              <Text
-                style={[styles.navLabel, isActive && styles.activeNavLabel]}
-              >
-                {item.label}
-              </Text>
-            </Pressable>
-          );
-        })}
+              return (
+                <>
+                  <Ionicons
+                    name={isHighlighted ? filledIcon : item.icon}
+                    size={22}
+                    color={isHighlighted ? "#2D6A4F" : "#8b8f97"}
+                  />
+                  <Text
+                    style={[styles.navLabel, isHighlighted && styles.activeNavLabel]}
+                  >
+                    {item.label}
+                  </Text>
+                </>
+              );
+            }}
+          </Pressable>
+        ))}
       </View>
     </View>
   );

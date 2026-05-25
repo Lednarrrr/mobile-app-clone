@@ -91,20 +91,25 @@ export default function InventoryScreen({ ingredients, onInventoryChange }) {
       return;
     }
 
-    if (isEditing) {
-      updateIngredient(
-        editingIngredientId,
-        name,
-        quantity,
-        unit,
-        category,
-        expiryDate,
-      );
-      
-      setEditingItem(null);
-      onInventoryChange(); // <-- This tells App.js to rebuild the Reverse Index!
+    try {
+      if (isEditing) {
+        updateIngredient(
+          editingIngredientId,
+          name,
+          quantity,
+          unit,
+          category,
+          expiryDate,
+        );
+      } else {
+        addIngredient(name, quantity, unit, category, expiryDate);
+      }
+
+      resetForm();
+      onInventoryChange();
     } catch (error) {
-      console.error("Failed to update ingredient:", error);
+      console.error("Failed to save ingredient:", error);
+      Alert.alert("Save failed", "Please try saving the ingredient again.");
     }
   }
 
@@ -136,11 +141,14 @@ export default function InventoryScreen({ ingredients, onInventoryChange }) {
           style: "destructive",
           onPress: () => {
             try {
-              deleteIngredient(editingItem.id);
-              setEditingItem(null);
-              onInventoryChange(); // <-- Keeps the Cook tab perfectly in sync
+              deleteIngredient(id);
+              onInventoryChange();
             } catch (error) {
               console.error("Failed to delete ingredient:", error);
+              Alert.alert(
+                "Delete failed",
+                "Please try deleting the ingredient again.",
+              );
             }
           },
         },
@@ -313,77 +321,9 @@ export default function InventoryScreen({ ingredients, onInventoryChange }) {
               </Pressable>
             </View>
           </View>
-        ) : (
-          ingredients.map((item) => (
-            <Pressable 
-              key={item.id} 
-              style={styles.inventoryItem} 
-              onPress={() => handleEditIngredient(item)} // <-- THIS IS THE FIX
-            >
-              <View style={styles.itemInfo}>
-                <Text style={styles.itemName}>{item.name}</Text>
-                <Text style={styles.itemMeta}>
-                  {item.category || "Uncategorized"} 
-                  {item.expiry_date ? ` • Exp: ${item.expiry_date}` : ""}
-                </Text>
-              </View>
-              <View style={styles.itemAmountWrap}>
-                <Text style={styles.itemQty}>{item.quantity || "-"}</Text>
-                <Text style={styles.itemUnit}>{item.unit || ""}</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={16} color="#d1d5db" style={{ marginLeft: 8 }} />
-            </Pressable>
-          ))
-        )}
-      </ScrollView>
-
-      {/* --- EDIT / DELETE MODAL --- */}
-      <Modal visible={!!editingItem} transparent animationType="fade">
-        <View style={styles.modalBackdrop}>
-          <Pressable style={StyleSheet.absoluteFillObject} onPress={() => setEditingItem(null)} />
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Edit {editingItem?.name}</Text>
-              <Pressable onPress={() => setEditingItem(null)}>
-                <Ionicons name="close" size={24} color="#111827" />
-              </Pressable>
-            </View>
-
-            <View style={styles.formRow}>
-              <View style={styles.formCol}>
-                <Text style={styles.label}>Quantity</Text>
-                <TextInput
-                  style={styles.input}
-                  value={editQty}
-                  onChangeText={setEditQty}
-                  keyboardType="numeric"
-                  placeholder="e.g., 2"
-                />
-              </View>
-              <View style={styles.formCol}>
-                <Text style={styles.label}>Unit</Text>
-                <TextInput
-                  style={styles.input}
-                  value={editUnit}
-                  onChangeText={setEditUnit}
-                  placeholder="e.g., kg"
-                />
-              </View>
-            </View>
-
-            <View style={styles.buttonRow}>
-              <Pressable style={styles.deleteButton} onPress={handleDelete}>
-                <Ionicons name="trash-outline" size={20} color="#dc2626" />
-              </Pressable>
-              <Pressable style={styles.saveButton} onPress={handleSaveEdit}>
-                <Text style={styles.saveButtonText}>Save Changes</Text>
-              </Pressable>
-            </View>
-
-          </View>
-        </View>
-      </Modal>
-    </View>
+        ))
+      )}
+    </ScrollView>
   );
 }
 

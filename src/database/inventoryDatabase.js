@@ -23,8 +23,6 @@ function addColumnIfMissing(tableName, columnName, columnDefinition) {
 }
 
 export function initInventoryDatabase() {
-  // CRITICAL FIX: Changed table name to 'ingredients' 
-  // and added the missing created_at / updated_at columns!
   db.execSync(`
     CREATE TABLE IF NOT EXISTS ingredients (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,7 +36,9 @@ export function initInventoryDatabase() {
     );
   `);
 
-  // --- Custom Recipes Table ---
+  addColumnIfMissing('ingredients', 'created_at', 'created_at DATETIME DEFAULT CURRENT_TIMESTAMP');
+  addColumnIfMissing('ingredients', 'updated_at', 'updated_at DATETIME DEFAULT CURRENT_TIMESTAMP');
+
   db.execSync(`
     CREATE TABLE IF NOT EXISTS custom_recipes (
       id TEXT PRIMARY KEY,
@@ -49,6 +49,12 @@ export function initInventoryDatabase() {
       ingredients TEXT 
     );
   `);
+
+  addColumnIfMissing('custom_recipes', 'category', 'category TEXT');
+  addColumnIfMissing('custom_recipes', 'name', 'name TEXT');
+  addColumnIfMissing('custom_recipes', 'prep_time_minutes', 'prep_time_minutes INTEGER');
+  addColumnIfMissing('custom_recipes', 'servings', 'servings INTEGER');
+  addColumnIfMissing('custom_recipes', 'ingredients', 'ingredients TEXT');
 }
 
 // --- Add a Custom Recipe ---
@@ -78,7 +84,7 @@ export function getCustomRecipes() {
     try {
       // Defensive parsing just in case the SQLite string is corrupted
       parsedIngredients = JSON.parse(row.ingredients);
-    } catch (e) {
+    } catch (_error) {
       console.warn(`Failed to parse ingredients for recipe ${row.id}`);
     }
     
