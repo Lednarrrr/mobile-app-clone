@@ -2,8 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import {
+  Alert,
   Animated,
   Easing,
   Modal,
@@ -17,20 +18,29 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import INGREDIENT_SYNONYMS from "./src/data/ingredientSynonyms.json";
+import Fuse from "fuse.js";
+import RECIPES from "./src/data/recipes.json";
 import { KARINDERYA_STARTER_INVENTORY } from "./src/data/starterInventory";
 import {
   addIngredient,
   addStarterInventory,
   getIngredients,
   initInventoryDatabase,
+  getCustomRecipes,
+  addCustomRecipe, // <-- Added for saving custom recipes
 } from "./src/database/inventoryDatabase";
-import InventoryScreen from "./src/screens/InventoryScreen";
-import RecommendationScreen from "./src/screens/RecommendationScreen";
+
 import {
+  initializeRecommendationEngine,
+  appendRecipeToEngine, 
   getRecipeRecommendations,
   getShoppingListFromRecommendations,
-} from "./src/utils/recommendationEngine";
+} from "./src/logic/recommendationEngine";
+
+// --- ADD THESE TWO LINES RIGHT HERE ---
+import InventoryScreen from "./src/screens/InventoryScreen";
+import RecommendationScreen from "./src/screens/RecommendationScreen";
+// -------------------------------------
 
 import BottomNavigation from "./src/components/BottomNavigation";
 import HomeScreen from "./src/components/HomeScreen";
@@ -47,44 +57,101 @@ export default function App() {
   const [ingredients, setIngredients] = useState([]);
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  
+  // Modals & Menus
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+  const [isActionMenuVisible, setIsActionMenuVisible] = useState(false); 
+  const [isAddRecipeModalVisible, setIsAddRecipeModalVisible] = useState(false); 
+  
+  // Ingredient Form States
   const [newItemName, setNewItemName] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
   const [newItemQty, setNewItemQty] = useState("");
   const [newItemUnit, setNewItemUnit] = useState("");
   const [newItemCategory, setNewItemCategory] = useState("");
   const [customCategory, setCustomCategory] = useState("");
   const [newItemExpiry, setNewItemExpiry] = useState("");
+  
+  // Picker States
   const [isUnitMenuOpen, setIsUnitMenuOpen] = useState(false);
   const [isExpiryPickerOpen, setIsExpiryPickerOpen] = useState(false);
   const [expiryDateValue, setExpiryDateValue] = useState(null);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+  
+  // Animations
   const modalTranslateY = useRef(new Animated.Value(420)).current;
   const modalBackdropOpacity = useRef(new Animated.Value(0)).current;
 
+  // --- CUSTOM RECIPE FORM STATES ---
+  const [customRecipes, setCustomRecipes] = useState([]);
+  const [newRecipeName, setNewRecipeName] = useState("");
+  const [newRecipeCategory, setNewRecipeCategory] = useState("Ulam");
+  const [newRecipePrepTime, setNewRecipePrepTime] = useState("");
+  const [newRecipeServings, setNewRecipeServings] = useState("");
+  const [newRecipeIngredients, setNewRecipeIngredients] = useState([
+    { name: "", quantity: "", unit: "" }
+  ]);
+
+  // --- DYNAMIC FUSE & GATEKEEPER (State-Driven) ---
+  const [engineData, setEngineData] = useState({ fuse: null, masterSet: new Set() });
+  
+  // Create quick references so the rest of your code doesn't need to change
+  const fuse = engineData.fuse;
+  const masterSet = engineData.masterSet;
+
   useEffect(() => {
-    initInventoryDatabase();
-    loadIngredients();
+    try {
+      initInventoryDatabase();
+      loadAppData(); 
+    } catch (error) {
+      console.error("Failed to initialize Kusinera database:", error);
+    }
     checkOnboardingStatus();
   }, []);
 
-  async function checkOnboardingStatus() {
-    const savedStatus = await SecureStore.getItemAsync(ONBOARDING_COMPLETE_KEY);
-    setHasCompletedOnboarding(savedStatus === "true");
-    setIsCheckingOnboarding(false);
+  // Fetches tables on boot and triggers the INITIAL Reverse Index build
+  function loadAppData() {
+    try {
+      setIngredients(getIngredients());
+      
+      const sqliteRecipes = getCustomRecipes();
+      setCustomRecipes(sqliteRecipes); 
+      
+      // Build the engine once on boot
+      const engineResult = initializeRecommendationEngine(sqliteRecipes);
+      if (engineResult && engineResult.fuseArray) {
+        setEngineData({
+          fuse: new Fuse(engineResult.fuseArray, { keys: ['name'], threshold: 0.3 }),
+          masterSet: engineResult.masterSet
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load app data:", error);
+    }
   }
 
-  function loadIngredients() {
-    const savedIngredients = getIngredients();
-    setIngredients(savedIngredients);
+  async function checkOnboardingStatus() {
+    try {
+      const savedStatus = await SecureStore.getItemAsync(ONBOARDING_COMPLETE_KEY);
+      setHasCompletedOnboarding(savedStatus === "true");
+    } catch (error) {
+      console.error("SecureStore error:", error);
+      setHasCompletedOnboarding(false);
+    } finally {
+      setIsCheckingOnboarding(false);
+    }
   }
 
   async function completeOnboarding({ useStarterPack }) {
     if (useStarterPack) {
-      addStarterInventory(KARINDERYA_STARTER_INVENTORY);
-      loadIngredients();
+      try {
+        addStarterInventory(KARINDERYA_STARTER_INVENTORY);
+        loadAppData();
+      } catch (error) {
+        console.error("Failed to load starter inventory:", error);
+      }
     }
-
     await SecureStore.setItemAsync(ONBOARDING_COMPLETE_KEY, "true");
     setHasCompletedOnboarding(true);
   }
@@ -96,6 +163,22 @@ export default function App() {
   ).length;
   const expiringSoonCount = getExpiringSoonCount(ingredients);
 
+  // --- ACTION MENU & ROUTING ---
+  function openActionMenu() {
+    setIsActionMenuVisible(true);
+  }
+
+  function handleSelectAddIngredient() {
+    setIsActionMenuVisible(false);
+    openAddModal();
+  }
+
+  function handleSelectAddRecipe() {
+    setIsActionMenuVisible(false);
+    setIsAddRecipeModalVisible(true);
+  }
+
+  // --- PANTRY INGREDIENT HANDLERS ---
   function openAddModal() {
     setIsAddModalOpen(true);
     setIsAddModalVisible(true);
@@ -123,6 +206,7 @@ export default function App() {
     setIsUnitMenuOpen(false);
     setIsExpiryPickerOpen(false);
     setIsCategoryMenuOpen(false);
+    setSuggestions([]);
 
     Animated.parallel([
       Animated.timing(modalTranslateY, {
@@ -138,10 +222,7 @@ export default function App() {
         useNativeDriver: true,
       }),
     ]).start(({ finished }) => {
-      if (!finished) {
-        return;
-      }
-
+      if (!finished) return;
       setIsAddModalVisible(false);
       setNewItemName("");
       setNewItemQty("");
@@ -165,54 +246,125 @@ export default function App() {
       setIsExpiryPickerOpen(false);
       return;
     }
-
     const nextDate = selectedDate || expiryDateValue || new Date();
     setExpiryDateValue(nextDate);
     setNewItemExpiry(formatDateValue(nextDate));
+    if (Platform.OS === "android") setIsExpiryPickerOpen(false);
+  }
 
-    if (Platform.OS === "android") {
-      setIsExpiryPickerOpen(false);
+  function handleNameChange(text) {
+    setNewItemName(text);
+    // Added safety check: ensure 'fuse' actually exists before searching
+    if (text.length > 1 && fuse) { 
+      const results = fuse.search(text);
+      const matches = results.slice(0, 4).map(r => r.item.name);
+      setSuggestions(matches); 
+    } else {
+      setSuggestions([]);
     }
   }
 
-  function normalizeLookupValue(value) {
-    return value.trim().toLowerCase().replace(/\s+/g, " ");
+  function selectSuggestion(name) {
+    setNewItemName(name);
+    setSuggestions([]); 
   }
 
-  const normalizedName = normalizeLookupValue(newItemName);
-  const synonymMatch = normalizedName
-    ? INGREDIENT_SYNONYMS[normalizedName] || findClosestSynonym(normalizedName)
-    : "";
-
   function handleAddItem() {
-    if (!newItemName.trim()) {
+    const cleanedName = newItemName.trim();
+    if (!cleanedName) return;
+
+    // Added safety check: ensure 'masterSet' exists before checking .has()
+    if (!masterSet || !masterSet.has(cleanedName.toLowerCase())) {
+      Alert.alert(
+        "Invalid Ingredient",
+        `"${cleanedName}" is not recognized as a valid ingredient. Please select an officially recognized item from the search suggestions.`,
+        [{ text: "Understood", style: "default" }]
+      );
       return;
     }
 
-    addIngredient(
-      newItemName,
-      newItemQty,
-      newItemUnit,
-      newItemCategory === "Other" ? customCategory : newItemCategory,
-      newItemExpiry,
-    );
-    loadIngredients();
-    closeAddModal();
+    try {
+      addIngredient(
+        cleanedName,
+        newItemQty,
+        newItemUnit,
+        newItemCategory === "Other" ? customCategory : newItemCategory,
+        newItemExpiry,
+      );
+      loadAppData(); 
+      closeAddModal();
+    } catch (error) {
+      console.error("Failed to add ingredient via modal:", error);
+    }
   }
 
-  function findClosestSynonym(value) {
-    const candidates = Object.keys(INGREDIENT_SYNONYMS).filter(
-      (key) => key.includes(value) || value.includes(key),
-    );
+  // --- CUSTOM RECIPE HANDLERS ---
+  function addRecipeIngredientRow() {
+    setNewRecipeIngredients([...newRecipeIngredients, { name: "", quantity: "", unit: "" }]);
+  }
 
-    if (candidates.length === 0) {
-      return "";
+  function updateRecipeIngredient(index, field, value) {
+    const updatedIngredients = [...newRecipeIngredients];
+    updatedIngredients[index][field] = value;
+    setNewRecipeIngredients(updatedIngredients);
+  }
+
+  function handleSaveCustomRecipe() {
+    if (!newRecipeName.trim()) {
+      Alert.alert("Missing Info", "Please give your recipe a name.");
+      return;
     }
 
-    const bestKey = candidates.sort((a, b) => b.length - a.length)[0];
-    return INGREDIENT_SYNONYMS[bestKey] || "";
+    const validIngredients = newRecipeIngredients.filter(ing => ing.name.trim() !== "");
+    if (validIngredients.length === 0) {
+      Alert.alert("Missing Ingredients", "A recipe must have at least one ingredient!");
+      return;
+    }
+
+    const newRecipe = {
+      id: `custom_${Date.now()}`, 
+      name: newRecipeName.trim(),
+      category: newRecipeCategory,
+      prep_time_minutes: parseInt(newRecipePrepTime) || 30,
+      servings: parseInt(newRecipeServings) || 4,
+      ingredients: validIngredients.map(ing => ({
+        name: ing.name.trim().toLowerCase(), 
+        quantity: parseFloat(ing.quantity) || 1,
+        unit: ing.unit || "pcs",
+        substitutable: false
+      }))
+    };
+
+    try {
+      // 1. Save to SQLite Database
+      addCustomRecipe(newRecipe);
+      
+      // 2. THE DELTA UPDATE: Append directly to the engine! 
+      // (Bypasses the full O(N) loadAppData rebuild)
+      const updatedEngine = appendRecipeToEngine(newRecipe);
+      if (updatedEngine) {
+        setEngineData({
+          fuse: new Fuse(updatedEngine.fuseArray, { keys: ['name'], threshold: 0.3 }),
+          masterSet: updatedEngine.masterSet
+        });
+      }
+
+      // 3. Update the UI state silently
+      setCustomRecipes(prev => [...prev, newRecipe]);
+      
+      setIsAddRecipeModalVisible(false);
+      setNewRecipeName("");
+      setNewRecipePrepTime("");
+      setNewRecipeServings("");
+      setNewRecipeIngredients([{ name: "", quantity: "", unit: "" }]);
+      
+      Alert.alert("Success", `${newRecipe.name} has been added to your cookbook!`);
+    } catch (error) {
+      console.error("Failed to save recipe:", error);
+    }
   }
 
+  // --- RENDER ---
   if (isCheckingOnboarding) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -251,7 +403,7 @@ export default function App() {
           {activeScreen === "inventory" && (
             <InventoryScreen
               ingredients={ingredients}
-              onInventoryChange={loadIngredients}
+              onInventoryChange={loadAppData}
             />
           )}
 
@@ -276,29 +428,51 @@ export default function App() {
         <BottomNavigation
           activeScreen={activeScreen}
           onChangeScreen={setActiveScreen}
-          onAddPress={openAddModal}
+          onAddPress={openActionMenu} 
         />
       </View>
 
+      {/* --- THE ACTION MENU MODAL --- */}
+      <Modal visible={isActionMenuVisible} transparent animationType="fade">
+        <View style={styles.modalBackdrop}>
+          <Pressable style={StyleSheet.absoluteFillObject} onPress={() => setIsActionMenuVisible(false)} />
+          <View style={[styles.modalSheet, { paddingBottom: 40 }]}>
+            <View style={styles.modalHandle} />
+            <Text style={[styles.modalTitle, { marginBottom: 20 }]}>What would you like to add?</Text>
+            
+            <Pressable style={styles.actionMenuButton} onPress={handleSelectAddIngredient}>
+              <View style={styles.actionMenuIconWrap}>
+                <Ionicons name="basket-outline" size={24} color="#2D6A4F" />
+              </View>
+              <View>
+                <Text style={styles.actionMenuTitle}>Pantry Ingredient</Text>
+                <Text style={styles.actionMenuSubtitle}>Add stock to your current inventory</Text>
+              </View>
+            </Pressable>
+
+            <Pressable style={styles.actionMenuButton} onPress={handleSelectAddRecipe}>
+              <View style={styles.actionMenuIconWrap}>
+                <Ionicons name="book-outline" size={24} color="#d4a20b" />
+              </View>
+              <View>
+                <Text style={styles.actionMenuTitle}>Custom Recipe</Text>
+                <Text style={styles.actionMenuSubtitle}>Teach the app a new dish to recommend</Text>
+              </View>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      {/* --- ADD PANTRY INGREDIENT MODAL --- */}
       <Modal
         animationType="none"
         transparent
         visible={isAddModalVisible}
         onRequestClose={closeAddModal}
       >
-        <Animated.View
-          style={[styles.modalBackdrop, { opacity: modalBackdropOpacity }]}
-        >
-          <Pressable
-            style={StyleSheet.absoluteFillObject}
-            onPress={closeAddModal}
-          />
-          <Animated.View
-            style={[
-              styles.modalSheet,
-              { transform: [{ translateY: modalTranslateY }] },
-            ]}
-          >
+        <Animated.View style={[styles.modalBackdrop, { opacity: modalBackdropOpacity }]}>
+          <Pressable style={StyleSheet.absoluteFillObject} onPress={closeAddModal} />
+          <Animated.View style={[styles.modalSheet, { transform: [{ translateY: modalTranslateY }] }]}>
             <View style={styles.modalHandle} />
             <View style={styles.modalHeaderRow}>
               <View style={styles.modalHeaderSpacer} />
@@ -307,180 +481,259 @@ export default function App() {
                 <Ionicons name="close" size={18} color="#111827" />
               </Pressable>
             </View>
+            
             <Text style={styles.modalFieldLabel}>Name</Text>
             <TextInput
               placeholder="e.g., Tomatoes"
               placeholderTextColor="#9ca3af"
               value={newItemName}
-              onChangeText={setNewItemName}
+              onChangeText={handleNameChange}
               style={styles.modalInput}
             />
-            {synonymMatch ? (
-              <View style={styles.matchRow}>
-                <Ionicons name="checkmark-circle" size={16} color="#1D9E75" />
-                <Text style={styles.matchText}>Matched: {synonymMatch}</Text>
+            
+            {suggestions.length > 0 ? (
+              <View style={styles.suggestionMenu}>
+                <ScrollView keyboardShouldPersistTaps="handled">
+                  <Text style={styles.suggestionTitle}>Suggested Ingredients</Text>
+                  {suggestions.map((sug, index) => (
+                    <Pressable 
+                      key={index} 
+                      style={styles.suggestionItem} 
+                      onPress={() => selectSuggestion(sug)}
+                    >
+                      <Ionicons name="search-outline" size={16} color="#6b7280" style={{marginRight: 10}} />
+                      <Text style={styles.suggestionText}>{sug}</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
               </View>
-            ) : null}
-
-            <Text style={styles.modalFieldLabel}>Category</Text>
-            <View style={styles.dropdownField}>
-              <Pressable
-                style={styles.selectRow}
-                onPress={() => setIsCategoryMenuOpen((open) => !open)}
-              >
-                <Text style={styles.selectText}>
-                  {newItemCategory || "Select category"}
-                </Text>
-                <Ionicons
-                  name={isCategoryMenuOpen ? "chevron-up" : "chevron-down"}
-                  size={16}
-                  color="#9ca3af"
-                />
-              </Pressable>
-              {isCategoryMenuOpen ? (
-                <View style={styles.selectMenu}>
-                  <ScrollView style={styles.selectMenuScroll}>
-                    {CATEGORY_OPTIONS.map((category) => (
-                      <Pressable
-                        key={category}
-                        style={styles.selectOption}
-                        onPress={() => {
-                          setNewItemCategory(category);
-                          setIsCategoryMenuOpen(false);
-                        }}
-                      >
-                        <Text style={styles.selectOptionText}>{category}</Text>
-                      </Pressable>
-                    ))}
-                  </ScrollView>
-                </View>
-              ) : null}
-            </View>
-            {newItemCategory === "Other" ? (
-              <TextInput
-                placeholder="Enter custom category"
-                placeholderTextColor="#9ca3af"
-                value={customCategory}
-                onChangeText={setCustomCategory}
-                style={styles.modalInput}
-              />
-            ) : null}
-
-            <View style={styles.formRow}>
-              <View style={styles.formColumn}>
-                <Text style={styles.modalFieldLabel}>Quantity (optional)</Text>
-                <TextInput
-                  placeholder="e.g., 3"
-                  placeholderTextColor="#9ca3af"
-                  value={newItemQty}
-                  onChangeText={setNewItemQty}
-                  keyboardType="numeric"
-                  style={styles.modalInput}
-                />
-              </View>
-              <View style={styles.formColumn}>
-                <Text style={styles.modalFieldLabel}>Unit</Text>
+            ) : (
+              <View>
+                <Text style={styles.modalFieldLabel}>Category</Text>
                 <View style={styles.dropdownField}>
-                  <Pressable
-                    style={styles.selectRow}
-                    onPress={() => setIsUnitMenuOpen((open) => !open)}
-                  >
-                    <Text style={styles.selectText}>
-                      {newItemUnit || "Select unit"}
-                    </Text>
-                    <Ionicons
-                      name={isUnitMenuOpen ? "chevron-up" : "chevron-down"}
-                      size={16}
-                      color="#9ca3af"
-                    />
+                  <Pressable style={styles.selectRow} onPress={() => setIsCategoryMenuOpen((open) => !open)}>
+                    <Text style={styles.selectText}>{newItemCategory || "Select category"}</Text>
+                    <Ionicons name={isCategoryMenuOpen ? "chevron-up" : "chevron-down"} size={16} color="#9ca3af" />
                   </Pressable>
-                  {isUnitMenuOpen ? (
+                  {isCategoryMenuOpen ? (
                     <View style={styles.selectMenu}>
                       <ScrollView style={styles.selectMenuScroll}>
-                        {UNIT_OPTIONS.map((unit) => (
+                        {CATEGORY_OPTIONS.map((category) => (
                           <Pressable
-                            key={unit}
+                            key={category}
                             style={styles.selectOption}
                             onPress={() => {
-                              setNewItemUnit(unit);
-                              setIsUnitMenuOpen(false);
+                              setNewItemCategory(category);
+                              setIsCategoryMenuOpen(false);
                             }}
                           >
-                            <Text style={styles.selectOptionText}>{unit}</Text>
+                            <Text style={styles.selectOptionText}>{category}</Text>
                           </Pressable>
                         ))}
                       </ScrollView>
                     </View>
                   ) : null}
                 </View>
-              </View>
-            </View>
-
-            <Text style={styles.modalFieldLabel}>Expiry date (optional)</Text>
-            <Pressable
-              style={styles.expiryRow}
-              onPress={() => setIsExpiryPickerOpen(true)}
-            >
-              <Ionicons name="calendar-outline" size={18} color="#9ca3af" />
-              <Text
-                style={
-                  newItemExpiry ? styles.expiryText : styles.expiryPlaceholder
-                }
-              >
-                {newItemExpiry || "Select date"}
-              </Text>
-            </Pressable>
-            {isExpiryPickerOpen ? (
-              <View style={styles.expiryPickerWrap}>
-                <DateTimePicker
-                  value={expiryDateValue || new Date()}
-                  mode="date"
-                  display="default"
-                  onChange={handleExpiryChange}
-                  minimumDate={new Date()}
-                />
-                {Platform.OS === "ios" ? (
-                  <Pressable
-                    style={styles.expiryDone}
-                    onPress={() => setIsExpiryPickerOpen(false)}
-                  >
-                    <Text style={styles.expiryDoneText}>Done</Text>
-                  </Pressable>
+                {newItemCategory === "Other" ? (
+                  <TextInput
+                    placeholder="Enter custom category"
+                    placeholderTextColor="#9ca3af"
+                    value={customCategory}
+                    onChangeText={setCustomCategory}
+                    style={styles.modalInput}
+                  />
                 ) : null}
-              </View>
-            ) : null}
 
-            <Pressable
-              style={styles.modalPrimaryButton}
-              onPress={handleAddItem}
-            >
-              <Text style={styles.modalPrimaryText}>Save</Text>
-            </Pressable>
+                <View style={styles.formRow}>
+                  <View style={styles.formColumn}>
+                    <Text style={styles.modalFieldLabel}>Quantity (optional)</Text>
+                    <TextInput
+                      placeholder="e.g., 3"
+                      placeholderTextColor="#9ca3af"
+                      value={newItemQty}
+                      onChangeText={setNewItemQty}
+                      keyboardType="numeric"
+                      style={styles.modalInput}
+                    />
+                  </View>
+                  <View style={styles.formColumn}>
+                    <Text style={styles.modalFieldLabel}>Unit</Text>
+                    <View style={styles.dropdownField}>
+                      <Pressable style={styles.selectRow} onPress={() => setIsUnitMenuOpen((open) => !open)}>
+                        <Text style={styles.selectText}>{newItemUnit || "Select unit"}</Text>
+                        <Ionicons name={isUnitMenuOpen ? "chevron-up" : "chevron-down"} size={16} color="#9ca3af" />
+                      </Pressable>
+                      {isUnitMenuOpen ? (
+                        <View style={styles.selectMenu}>
+                          <ScrollView style={styles.selectMenuScroll}>
+                            {UNIT_OPTIONS.map((unit) => (
+                              <Pressable
+                                key={unit}
+                                style={styles.selectOption}
+                                onPress={() => {
+                                  setNewItemUnit(unit);
+                                  setIsUnitMenuOpen(false);
+                                }}
+                              >
+                                <Text style={styles.selectOptionText}>{unit}</Text>
+                              </Pressable>
+                            ))}
+                          </ScrollView>
+                        </View>
+                      ) : null}
+                    </View>
+                  </View>
+                </View>
+
+                <Text style={styles.modalFieldLabel}>Expiry date (optional)</Text>
+                <Pressable style={styles.expiryRow} onPress={() => setIsExpiryPickerOpen(true)}>
+                  <Ionicons name="calendar-outline" size={18} color="#9ca3af" />
+                  <Text style={newItemExpiry ? styles.expiryText : styles.expiryPlaceholder}>
+                    {newItemExpiry || "Select date"}
+                  </Text>
+                </Pressable>
+                {isExpiryPickerOpen ? (
+                  <View style={styles.expiryPickerWrap}>
+                    <DateTimePicker
+                      value={expiryDateValue || new Date()}
+                      mode="date"
+                      display="default"
+                      onChange={handleExpiryChange}
+                      minimumDate={new Date()}
+                    />
+                    {Platform.OS === "ios" ? (
+                      <Pressable style={styles.expiryDone} onPress={() => setIsExpiryPickerOpen(false)}>
+                        <Text style={styles.expiryDoneText}>Done</Text>
+                      </Pressable>
+                    ) : null}
+                  </View>
+                ) : null}
+
+                <Pressable style={styles.modalPrimaryButton} onPress={handleAddItem}>
+                  <Text style={styles.modalPrimaryText}>Save</Text>
+                </Pressable>
+              </View>
+            )}
           </Animated.View>
         </Animated.View>
       </Modal>
+
+      {/* --- ADD CUSTOM RECIPE MODAL --- */}
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={isAddRecipeModalVisible}
+        onRequestClose={() => setIsAddRecipeModalVisible(false)}
+      >
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F5EE' }}>
+          <View style={[styles.modalHeaderRow, { paddingHorizontal: 16, paddingTop: 16 }]}>
+            <Pressable style={styles.modalClose} onPress={() => setIsAddRecipeModalVisible(false)}>
+              <Ionicons name="close" size={20} color="#111827" />
+            </Pressable>
+            <Text style={styles.modalTitle}>New Recipe</Text>
+            <View style={styles.modalHeaderSpacer} />
+          </View>
+
+          <ScrollView style={{ paddingHorizontal: 16 }} keyboardShouldPersistTaps="handled">
+            
+            {/* Basic Info */}
+            <Text style={styles.modalFieldLabel}>Recipe Name</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="e.g., Special Kare-Kare"
+              value={newRecipeName}
+              onChangeText={setNewRecipeName}
+            />
+
+            <View style={styles.formRow}>
+              <View style={styles.formColumn}>
+                <Text style={styles.modalFieldLabel}>Prep Time (mins)</Text>
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="e.g., 45"
+                  keyboardType="numeric"
+                  value={newRecipePrepTime}
+                  onChangeText={setNewRecipePrepTime}
+                />
+              </View>
+              <View style={styles.formColumn}>
+                <Text style={styles.modalFieldLabel}>Servings</Text>
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="e.g., 4"
+                  keyboardType="numeric"
+                  value={newRecipeServings}
+                  onChangeText={setNewRecipeServings}
+                />
+              </View>
+            </View>
+
+            {/* Dynamic Ingredients Section */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 24, marginBottom: 8 }}>
+              <Text style={[styles.modalFieldLabel, { marginTop: 0, marginBottom: 0 }]}>Ingredients Needed</Text>
+            </View>
+
+            {newRecipeIngredients.map((ingredient, index) => (
+              <View key={index} style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                <View style={{ flex: 2 }}>
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Ingredient name"
+                    value={ingredient.name}
+                    onChangeText={(text) => updateRecipeIngredient(index, 'name', text)}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Qty"
+                    keyboardType="numeric"
+                    value={ingredient.quantity}
+                    onChangeText={(text) => updateRecipeIngredient(index, 'quantity', text)}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Unit"
+                    value={ingredient.unit}
+                    onChangeText={(text) => updateRecipeIngredient(index, 'unit', text)}
+                  />
+                </View>
+              </View>
+            ))}
+
+            {/* Add Row Button */}
+            <Pressable 
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, borderStyle: 'dashed', borderWidth: 1, borderColor: '#9ca3af', borderRadius: 12, marginBottom: 24 }} 
+              onPress={addRecipeIngredientRow}
+            >
+              <Ionicons name="add" size={18} color="#4b5563" />
+              <Text style={{ color: '#4b5563', fontWeight: '600', marginLeft: 4 }}>Add another ingredient</Text>
+            </Pressable>
+
+            {/* Save Button */}
+            <Pressable style={[styles.modalPrimaryButton, { marginBottom: 40 }]} onPress={handleSaveCustomRecipe}>
+              <Text style={styles.modalPrimaryText}>Save Recipe to Cookbook</Text>
+            </Pressable>
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
+
     </SafeAreaView>
   );
 }
 
 function ShoppingList({ shoppingList }) {
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-    >
+    <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       <View style={styles.sectionHeader}>
         <Text style={styles.screenTitle}>Shopping list</Text>
-        <Text style={styles.screenSubtitle}>
-          Missing required ingredients grouped from your recipe matches.
-        </Text>
+        <Text style={styles.screenSubtitle}>Missing required ingredients grouped from your recipe matches.</Text>
       </View>
 
       {shoppingList.length === 0 ? (
-        <EmptyPanel
-          title="Nothing to buy yet"
-          text="Recipe matches with missing required ingredients will appear here."
-        />
+        <EmptyPanel title="Nothing to buy yet" text="Recipe matches with missing required ingredients will appear here." />
       ) : (
         shoppingList.map((item) => (
           <View key={item.name} style={styles.shoppingItem}>
@@ -489,10 +742,7 @@ function ShoppingList({ shoppingList }) {
             </View>
             <View style={styles.shoppingInfo}>
               <Text style={styles.shoppingName}>{item.name}</Text>
-              <Text style={styles.shoppingMeta}>
-                Needed by {item.recipeCount} matched recipe
-                {item.recipeCount > 1 ? "s" : ""}
-              </Text>
+              <Text style={styles.shoppingMeta}>Needed by {item.recipeCount} matched recipe{item.recipeCount > 1 ? "s" : ""}</Text>
             </View>
           </View>
         ))
@@ -503,24 +753,17 @@ function ShoppingList({ shoppingList }) {
 
 function SettingsPanel({ onResetOnboarding }) {
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-    >
+    <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       <View style={styles.sectionHeader}>
         <Text style={styles.screenTitle}>Settings</Text>
-        <Text style={styles.screenSubtitle}>
-          MVP controls for privacy, offline data, and future app preferences.
-        </Text>
+        <Text style={styles.screenSubtitle}>MVP controls for privacy, offline data, and future app preferences.</Text>
       </View>
 
       <View style={styles.settingsCard}>
         <Ionicons name="shield-checkmark-outline" size={28} color="#2D6A4F" />
         <View style={styles.settingsTextGroup}>
           <Text style={styles.settingsTitle}>Offline-first prototype</Text>
-          <Text style={styles.settingsText}>
-            Inventory data is stored locally on this device for the MVP.
-          </Text>
+          <Text style={styles.settingsText}>Inventory data is stored locally on this device for the MVP.</Text>
         </View>
       </View>
 
@@ -542,221 +785,74 @@ function EmptyPanel({ title, text }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: "#2D6A4F",
-    flex: 1,
+  safeArea: { backgroundColor: "#2D6A4F", flex: 1 },
+  loadingScreen: { alignItems: "center", flex: 1, justifyContent: "center", padding: 24 },
+  loadingTitle: { color: "#1c2a22", fontSize: 34, fontWeight: "900" },
+  loadingText: { color: "#69746c", fontSize: 15, marginTop: 8 },
+  container: { backgroundColor: "#F8F5EE", flex: 1, paddingHorizontal: 0, paddingTop: 0 },
+  content: { flex: 1, marginTop: 0 },
+  modalBackdrop: { backgroundColor: "rgba(17, 24, 39, 0.35)", flex: 1, justifyContent: "flex-end" },
+  modalSheet: { backgroundColor: "#ffffff", borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 28 },
+  modalHandle: { alignSelf: "center", backgroundColor: "#e5e7eb", borderRadius: 999, height: 4, marginBottom: 12, width: 48 },
+  modalHeaderRow: { alignItems: "center", flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
+  modalTitle: { color: "#111827", fontSize: 18, fontWeight: "900", textAlign: "center", flex: 1 },
+  modalHeaderSpacer: { height: 32, width: 32 },
+  modalClose: { alignItems: "center", backgroundColor: "#f3f4f6", borderRadius: 999, height: 32, justifyContent: "center", width: 32 },
+  modalFieldLabel: { color: "#6b7280", fontSize: 12, fontWeight: "800", marginBottom: 6, marginTop: 12 },
+  formRow: { flexDirection: "row", gap: 12, marginTop: 8 },
+  formColumn: { flex: 1 },
+  dropdownField: { position: "relative" },
+  selectRow: { alignItems: "center", borderColor: "#e5e7eb", borderRadius: 14, borderWidth: 1, flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 12, paddingVertical: 10 },
+  selectText: { color: "#111827", flex: 1, fontSize: 14, fontWeight: "500" },
+  selectMenu: { backgroundColor: "#ffffff", borderColor: "#e5e7eb", borderRadius: 12, borderWidth: 1, marginTop: 6, paddingVertical: 4, position: "absolute", top: 48, left: 0, right: 0, shadowColor: "#111827", shadowOpacity: 0.12, shadowOffset: { width: 0, height: 8 }, shadowRadius: 16, elevation: 6, zIndex: 10 },
+  selectMenuScroll: { maxHeight: 160 },
+  selectOption: { paddingHorizontal: 12, paddingVertical: 8 },
+  selectOptionText: { color: "#111827", fontSize: 13, fontWeight: "500" },
+  modalInput: { borderColor: "#e5e7eb", borderRadius: 14, borderWidth: 1, color: "#111827", fontSize: 14, paddingHorizontal: 12, paddingVertical: 10 },
+  expiryRow: { alignItems: "center", borderColor: "#e5e7eb", borderRadius: 14, borderWidth: 1, flexDirection: "row", gap: 8, paddingHorizontal: 12, paddingVertical: 10 },
+  expiryText: { color: "#111827", fontSize: 14, fontWeight: "600" },
+  expiryPlaceholder: { color: "#9ca3af", fontSize: 14, fontWeight: "500" },
+  expiryPickerWrap: { backgroundColor: "#ffffff", borderColor: "#e5e7eb", borderRadius: 14, borderWidth: 1, marginTop: 8, paddingHorizontal: 6, paddingVertical: 6 },
+  expiryDone: { alignItems: "center", borderRadius: 12, marginTop: 8, paddingVertical: 8 },
+  expiryDoneText: { color: "#111827", fontSize: 14, fontWeight: "700" },
+  modalPrimaryButton: { alignItems: "center", backgroundColor: "#d4a20b", borderRadius: 16, marginTop: 18, paddingVertical: 14 },
+  modalPrimaryText: { color: "#ffffff", fontSize: 15, fontWeight: "900" },
+  
+  suggestionMenu: { 
+    backgroundColor: '#f9fafb', 
+    borderColor: '#e5e7eb', 
+    borderWidth: 1, 
+    borderRadius: 14, 
+    marginTop: 12, 
+    marginBottom: 20,
+    maxHeight: 220, 
   },
-  loadingScreen: {
-    alignItems: "center",
-    flex: 1,
-    justifyContent: "center",
-    padding: 24,
-  },
-  loadingTitle: {
-    color: "#1c2a22",
-    fontSize: 34,
-    fontWeight: "900",
-  },
-  loadingText: {
-    color: "#69746c",
-    fontSize: 15,
-    marginTop: 8,
-  },
-  container: {
-    backgroundColor: "#F8F5EE",
-    flex: 1,
-    paddingHorizontal: 0,
-    paddingTop: 0,
-  },
-  content: {
-    flex: 1,
-    marginTop: 0,
-  },
-  modalBackdrop: {
-    backgroundColor: "rgba(17, 24, 39, 0.35)",
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  modalSheet: {
-    backgroundColor: "#ffffff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+  suggestionTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#9ca3af',
     paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 28,
+    paddingTop: 12,
+    paddingBottom: 4,
+    textTransform: 'uppercase',
   },
-  modalHandle: {
-    alignSelf: "center",
-    backgroundColor: "#e5e7eb",
-    borderRadius: 999,
-    height: 4,
-    marginBottom: 12,
-    width: 48,
+  suggestionItem: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingHorizontal: 16, 
+    paddingVertical: 14, 
+    borderBottomWidth: 1, 
+    borderBottomColor: '#f3f4f6' 
   },
-  modalHeaderRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 12,
+  suggestionText: { 
+    color: '#111827', 
+    fontSize: 15, 
+    fontWeight: '600', 
+    textTransform: 'capitalize' 
   },
-  modalTitle: {
-    color: "#111827",
-    fontSize: 18,
-    fontWeight: "900",
-    textAlign: "center",
-    flex: 1,
-  },
-  modalHeaderSpacer: {
-    height: 32,
-    width: 32,
-  },
-  modalClose: {
-    alignItems: "center",
-    backgroundColor: "#f3f4f6",
-    borderRadius: 999,
-    height: 32,
-    justifyContent: "center",
-    width: 32,
-  },
-  modalFieldLabel: {
-    color: "#6b7280",
-    fontSize: 12,
-    fontWeight: "800",
-    marginBottom: 6,
-    marginTop: 12,
-  },
-  matchRow: {
-    alignItems: "center",
-    backgroundColor: "#e8f8ee",
-    borderRadius: 999,
-    flexDirection: "row",
-    gap: 6,
-    marginTop: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  matchText: {
-    color: "#16a34a",
-    flex: 1,
-    fontSize: 12,
-    fontWeight: "800",
-  },
-  formRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 8,
-  },
-  formColumn: {
-    flex: 1,
-  },
-  dropdownField: {
-    position: "relative",
-  },
-  selectRow: {
-    alignItems: "center",
-    borderColor: "#e5e7eb",
-    borderRadius: 14,
-    borderWidth: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  selectText: {
-    color: "#111827",
-    flex: 1,
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  selectMenu: {
-    backgroundColor: "#ffffff",
-    borderColor: "#e5e7eb",
-    borderRadius: 12,
-    borderWidth: 1,
-    marginTop: 6,
-    paddingVertical: 4,
-    position: "absolute",
-    top: 48,
-    left: 0,
-    right: 0,
-    shadowColor: "#111827",
-    shadowOpacity: 0.12,
-    shadowOffset: { width: 0, height: 8 },
-    shadowRadius: 16,
-    elevation: 6,
-    zIndex: 10,
-  },
-  selectMenuScroll: {
-    maxHeight: 160,
-  },
-  selectOption: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  selectOptionText: {
-    color: "#111827",
-    fontSize: 13,
-    fontWeight: "500",
-  },
-  modalInput: {
-    borderColor: "#e5e7eb",
-    borderRadius: 14,
-    borderWidth: 1,
-    color: "#111827",
-    fontSize: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  expiryRow: {
-    alignItems: "center",
-    borderColor: "#e5e7eb",
-    borderRadius: 14,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  expiryText: {
-    color: "#111827",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  expiryPlaceholder: {
-    color: "#9ca3af",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  expiryPickerWrap: {
-    backgroundColor: "#ffffff",
-    borderColor: "#e5e7eb",
-    borderRadius: 14,
-    borderWidth: 1,
-    marginTop: 8,
-    paddingHorizontal: 6,
-    paddingVertical: 6,
-  },
-  expiryDone: {
-    alignItems: "center",
-    borderRadius: 12,
-    marginTop: 8,
-    paddingVertical: 8,
-  },
-  expiryDoneText: {
-    color: "#111827",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  modalPrimaryButton: {
-    alignItems: "center",
-    backgroundColor: "#d4a20b",
-    borderRadius: 16,
-    marginTop: 18,
-    paddingVertical: 14,
-  },
-  modalPrimaryText: {
-    color: "#ffffff",
-    fontSize: 15,
-    fontWeight: "900",
-  },
+
+  actionMenuButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f9fafb', padding: 16, borderRadius: 16, marginBottom: 12, borderWidth: 1, borderColor: '#e5e7eb' },
+  actionMenuIconWrap: { width: 48, height: 48, borderRadius: 12, backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'center', marginRight: 16, shadowColor: '#000', shadowOpacity: 0.05, shadowOffset: { width: 0, height: 2 }, shadowRadius: 4, elevation: 2 },
+  actionMenuTitle: { fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 2 },
+  actionMenuSubtitle: { fontSize: 13, color: '#6b7280' },
 });

@@ -3,190 +3,1503 @@
     "id": "dish_001",
     "name": "Chicken Adobo",
     "category": "Ulam",
-    "tags": ["chicken", "karinderya-staple", "bestseller"],
+    "tags": [
+      "chicken",
+      "karinderya-staple",
+      "bestseller"
+    ],
     "prep_time_minutes": 45,
     "servings": 4,
     "ingredients": [
-      { "name": "chicken", "quantity": 1, "unit": "kg", "substitutable": false },
-      { "name": "soy sauce", "quantity": 120, "unit": "ml", "substitutable": false },
-      { "name": "vinegar", "quantity": 120, "unit": "ml", "substitutable": false },
-      { "name": "garlic", "quantity": 1, "unit": "head", "substitutable": false },
-      { "name": "bay leaf", "quantity": 3, "unit": "pcs", "substitutable": true },
-      { "name": "pepper", "quantity": 1, "unit": "tsp", "substitutable": true }
+      {
+        "name": "chicken",
+        "quantity": 1,
+        "unit": "kg",
+        "substitutable": false
+      },
+      {
+        "name": "soy sauce",
+        "quantity": 120,
+        "unit": "ml",
+        "substitutable": false
+      },
+      {
+        "name": "vinegar",
+        "quantity": 120,
+        "unit": "ml",
+        "substitutable": false
+      },
+      {
+        "name": "garlic",
+        "quantity": 1,
+        "unit": "head",
+        "substitutable": false
+      },
+      {
+        "name": "bay leaf",
+        "quantity": 3,
+        "unit": "pcs",
+        "substitutable": true
+      },
+      {
+        "name": "pepper",
+        "quantity": 1,
+        "unit": "tsp",
+        "substitutable": true
+      }
     ]
   },
   {
     "id": "dish_002",
     "name": "Pork Adobo",
     "category": "Ulam",
-    "tags": ["pork", "karinderya-staple", "bestseller"],
+    "tags": [
+      "pork",
+      "karinderya-staple",
+      "bestseller"
+    ],
     "prep_time_minutes": 50,
     "servings": 4,
     "ingredients": [
-      { "name": "pork belly", "quantity": 1, "unit": "kg", "substitutable": false },
-      { "name": "soy sauce", "quantity": 120, "unit": "ml", "substitutable": false },
-      { "name": "vinegar", "quantity": 120, "unit": "ml", "substitutable": false },
-      { "name": "garlic", "quantity": 1, "unit": "head", "substitutable": false },
-      { "name": "bay leaf", "quantity": 3, "unit": "pcs", "substitutable": true },
-      { "name": "pepper", "quantity": 1, "unit": "tsp", "substitutable": true }
+      {
+        "name": "pork belly",
+        "quantity": 1,
+        "unit": "kg",
+        "substitutable": false
+      },
+      {
+        "name": "soy sauce",
+        "quantity": 120,
+        "unit": "ml",
+        "substitutable": false
+      },
+      {
+        "name": "vinegar",
+        "quantity": 120,
+        "unit": "ml",
+        "substitutable": false
+      },
+      {
+        "name": "garlic",
+        "quantity": 1,
+        "unit": "head",
+        "substitutable": false
+      },
+      {
+        "name": "bay leaf",
+        "quantity": 3,
+        "unit": "pcs",
+        "substitutable": true
+      },
+      {
+        "name": "pepper",
+        "quantity": 1,
+        "unit": "tsp",
+        "substitutable": true
+      }
     ]
   },
   {
     "id": "dish_003",
     "name": "Pork Sinigang",
     "category": "Sabaw",
-    "tags": ["pork", "soup", "sour"],
+    "tags": [
+      "pork",
+      "soup",
+      "sour"
+    ],
     "prep_time_minutes": 60,
     "servings": 5,
     "ingredients": [
-      { "name": "pork", "quantity": 1, "unit": "kg", "substitutable": false },
-      { "name": "sinigang mix", "quantity": 1, "unit": "pack", "substitutable": false },
-      { "name": "tomato", "quantity": 4, "unit": "pcs", "substitutable": false },
-      { "name": "radish", "quantity": 1, "unit": "pc", "substitutable": true },
-      { "name": "eggplant", "quantity": 2, "unit": "pcs", "substitutable": true },
-      { "name": "kangkong", "quantity": 1, "unit": "bundle", "substitutable": true }
+      {
+        "name": "pork",
+        "quantity": 1,
+        "unit": "kg",
+        "substitutable": false
+      },
+      {
+        "name": "sinigang mix",
+        "quantity": 1,
+        "unit": "pack",
+        "substitutable": false
+      },
+      {
+        "name": "tomato",
+        "quantity": 4,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "radish",
+        "quantity": 1,
+        "unit": "pc",
+        "substitutable": true
+      },
+      {
+        "name": "eggplant",
+        "quantity": 2,
+        "unit": "pcs",
+        "substitutable": true
+      },
+      {
+        "name": "kangkong",
+        "quantity": 1,
+        "unit": "bundle",
+        "substitutable": true
+      }
     ]
   },
   {
     "id": "dish_004",
     "name": "Chicken Tinola",
     "category": "Sabaw",
-    "tags": ["chicken", "soup", "ginger"],
+    "tags": [
+      "chicken",
+      "soup",
+      "ginger"
+    ],
     "prep_time_minutes": 45,
     "servings": 5,
     "ingredients": [
-      { "name": "chicken", "quantity": 1, "unit": "kg", "substitutable": false },
-      { "name": "ginger", "quantity": 1, "unit": "thumb", "substitutable": false },
-      { "name": "garlic", "quantity": 5, "unit": "cloves", "substitutable": false },
-      { "name": "onion", "quantity": 1, "unit": "pc", "substitutable": false },
-      { "name": "sayote", "quantity": 2, "unit": "pcs", "substitutable": true },
-      { "name": "malunggay", "quantity": 1, "unit": "cup", "substitutable": true }
+      {
+        "name": "chicken",
+        "quantity": 1,
+        "unit": "kg",
+        "substitutable": false
+      },
+      {
+        "name": "ginger",
+        "quantity": 1,
+        "unit": "thumb",
+        "substitutable": false
+      },
+      {
+        "name": "garlic",
+        "quantity": 5,
+        "unit": "cloves",
+        "substitutable": false
+      },
+      {
+        "name": "onion",
+        "quantity": 1,
+        "unit": "pc",
+        "substitutable": false
+      },
+      {
+        "name": "sayote",
+        "quantity": 2,
+        "unit": "pcs",
+        "substitutable": true
+      },
+      {
+        "name": "malunggay",
+        "quantity": 1,
+        "unit": "cup",
+        "substitutable": true
+      }
     ]
   },
   {
     "id": "dish_005",
     "name": "Pork Menudo",
     "category": "Ulam",
-    "tags": ["pork", "tomato-sauce", "karinderya-staple"],
+    "tags": [
+      "pork",
+      "tomato-sauce",
+      "karinderya-staple"
+    ],
     "prep_time_minutes": 60,
     "servings": 5,
     "ingredients": [
-      { "name": "pork", "quantity": 1, "unit": "kg", "substitutable": false },
-      { "name": "tomato sauce", "quantity": 250, "unit": "g", "substitutable": false },
-      { "name": "potato", "quantity": 3, "unit": "pcs", "substitutable": false },
-      { "name": "carrot", "quantity": 2, "unit": "pcs", "substitutable": false },
-      { "name": "bell pepper", "quantity": 1, "unit": "pc", "substitutable": true },
-      { "name": "liver", "quantity": 250, "unit": "g", "substitutable": true }
+      {
+        "name": "pork",
+        "quantity": 1,
+        "unit": "kg",
+        "substitutable": false
+      },
+      {
+        "name": "tomato sauce",
+        "quantity": 250,
+        "unit": "g",
+        "substitutable": false
+      },
+      {
+        "name": "potato",
+        "quantity": 3,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "carrot",
+        "quantity": 2,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "bell pepper",
+        "quantity": 1,
+        "unit": "pc",
+        "substitutable": true
+      },
+      {
+        "name": "liver",
+        "quantity": 250,
+        "unit": "g",
+        "substitutable": true
+      }
     ]
   },
   {
     "id": "dish_006",
     "name": "Pinakbet",
     "category": "Gulay",
-    "tags": ["vegetable", "ilocano", "budget-friendly"],
+    "tags": [
+      "vegetable",
+      "ilocano",
+      "budget-friendly"
+    ],
     "prep_time_minutes": 35,
     "servings": 4,
     "ingredients": [
-      { "name": "eggplant", "quantity": 3, "unit": "pcs", "substitutable": false },
-      { "name": "squash", "quantity": 500, "unit": "g", "substitutable": false },
-      { "name": "okra", "quantity": 8, "unit": "pcs", "substitutable": true },
-      { "name": "string beans", "quantity": 1, "unit": "bundle", "substitutable": false },
-      { "name": "bitter melon", "quantity": 1, "unit": "pc", "substitutable": true },
-      { "name": "bagoong", "quantity": 3, "unit": "tbsp", "substitutable": false }
+      {
+        "name": "eggplant",
+        "quantity": 3,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "squash",
+        "quantity": 500,
+        "unit": "g",
+        "substitutable": false
+      },
+      {
+        "name": "okra",
+        "quantity": 8,
+        "unit": "pcs",
+        "substitutable": true
+      },
+      {
+        "name": "string beans",
+        "quantity": 1,
+        "unit": "bundle",
+        "substitutable": false
+      },
+      {
+        "name": "bitter melon",
+        "quantity": 1,
+        "unit": "pc",
+        "substitutable": true
+      },
+      {
+        "name": "bagoong",
+        "quantity": 3,
+        "unit": "tbsp",
+        "substitutable": false
+      }
     ]
   },
   {
     "id": "dish_007",
     "name": "Bistek Tagalog",
     "category": "Ulam",
-    "tags": ["beef", "soy-sauce", "calamansi"],
+    "tags": [
+      "beef",
+      "soy-sauce",
+      "calamansi"
+    ],
     "prep_time_minutes": 45,
     "servings": 4,
     "ingredients": [
-      { "name": "beef", "quantity": 750, "unit": "g", "substitutable": false },
-      { "name": "soy sauce", "quantity": 80, "unit": "ml", "substitutable": false },
-      { "name": "calamansi", "quantity": 8, "unit": "pcs", "substitutable": false },
-      { "name": "onion", "quantity": 2, "unit": "pcs", "substitutable": false },
-      { "name": "garlic", "quantity": 4, "unit": "cloves", "substitutable": true },
-      { "name": "pepper", "quantity": 1, "unit": "tsp", "substitutable": true }
+      {
+        "name": "beef",
+        "quantity": 750,
+        "unit": "g",
+        "substitutable": false
+      },
+      {
+        "name": "soy sauce",
+        "quantity": 80,
+        "unit": "ml",
+        "substitutable": false
+      },
+      {
+        "name": "calamansi",
+        "quantity": 8,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "onion",
+        "quantity": 2,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "garlic",
+        "quantity": 4,
+        "unit": "cloves",
+        "substitutable": true
+      },
+      {
+        "name": "pepper",
+        "quantity": 1,
+        "unit": "tsp",
+        "substitutable": true
+      }
     ]
   },
   {
     "id": "dish_008",
     "name": "Ginataang Kalabasa at Sitaw",
     "category": "Gulay",
-    "tags": ["vegetable", "coconut-milk", "budget-friendly"],
+    "tags": [
+      "vegetable",
+      "coconut-milk",
+      "budget-friendly"
+    ],
     "prep_time_minutes": 35,
     "servings": 4,
     "ingredients": [
-      { "name": "squash", "quantity": 700, "unit": "g", "substitutable": false },
-      { "name": "string beans", "quantity": 1, "unit": "bundle", "substitutable": false },
-      { "name": "coconut milk", "quantity": 400, "unit": "ml", "substitutable": false },
-      { "name": "garlic", "quantity": 4, "unit": "cloves", "substitutable": false },
-      { "name": "onion", "quantity": 1, "unit": "pc", "substitutable": false },
-      { "name": "shrimp paste", "quantity": 2, "unit": "tbsp", "substitutable": true }
+      {
+        "name": "squash",
+        "quantity": 700,
+        "unit": "g",
+        "substitutable": false
+      },
+      {
+        "name": "string beans",
+        "quantity": 1,
+        "unit": "bundle",
+        "substitutable": false
+      },
+      {
+        "name": "coconut milk",
+        "quantity": 400,
+        "unit": "ml",
+        "substitutable": false
+      },
+      {
+        "name": "garlic",
+        "quantity": 4,
+        "unit": "cloves",
+        "substitutable": false
+      },
+      {
+        "name": "onion",
+        "quantity": 1,
+        "unit": "pc",
+        "substitutable": false
+      },
+      {
+        "name": "shrimp paste",
+        "quantity": 2,
+        "unit": "tbsp",
+        "substitutable": true
+      }
     ]
   },
   {
     "id": "dish_009",
     "name": "Fried Bangus",
     "category": "Prito",
-    "tags": ["fish", "fried", "quick-cook"],
+    "tags": [
+      "fish",
+      "fried",
+      "quick-cook"
+    ],
     "prep_time_minutes": 25,
     "servings": 3,
     "ingredients": [
-      { "name": "milkfish", "quantity": 1, "unit": "pc", "substitutable": false },
-      { "name": "vinegar", "quantity": 60, "unit": "ml", "substitutable": true },
-      { "name": "garlic", "quantity": 4, "unit": "cloves", "substitutable": true },
-      { "name": "salt", "quantity": 1, "unit": "tsp", "substitutable": false },
-      { "name": "cooking oil", "quantity": 250, "unit": "ml", "substitutable": false }
+      {
+        "name": "milkfish",
+        "quantity": 1,
+        "unit": "pc",
+        "substitutable": false
+      },
+      {
+        "name": "vinegar",
+        "quantity": 60,
+        "unit": "ml",
+        "substitutable": true
+      },
+      {
+        "name": "garlic",
+        "quantity": 4,
+        "unit": "cloves",
+        "substitutable": true
+      },
+      {
+        "name": "salt",
+        "quantity": 1,
+        "unit": "tsp",
+        "substitutable": false
+      },
+      {
+        "name": "cooking oil",
+        "quantity": 250,
+        "unit": "ml",
+        "substitutable": false
+      }
     ]
   },
   {
     "id": "dish_010",
     "name": "Tortang Talong",
     "category": "Prito",
-    "tags": ["eggplant", "egg", "budget-friendly"],
+    "tags": [
+      "eggplant",
+      "egg",
+      "budget-friendly"
+    ],
     "prep_time_minutes": 30,
     "servings": 3,
     "ingredients": [
-      { "name": "eggplant", "quantity": 3, "unit": "pcs", "substitutable": false },
-      { "name": "egg", "quantity": 3, "unit": "pcs", "substitutable": false },
-      { "name": "garlic", "quantity": 3, "unit": "cloves", "substitutable": true },
-      { "name": "onion", "quantity": 1, "unit": "pc", "substitutable": true },
-      { "name": "cooking oil", "quantity": 120, "unit": "ml", "substitutable": false }
+      {
+        "name": "eggplant",
+        "quantity": 3,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "egg",
+        "quantity": 3,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "garlic",
+        "quantity": 3,
+        "unit": "cloves",
+        "substitutable": true
+      },
+      {
+        "name": "onion",
+        "quantity": 1,
+        "unit": "pc",
+        "substitutable": true
+      },
+      {
+        "name": "cooking oil",
+        "quantity": 120,
+        "unit": "ml",
+        "substitutable": false
+      }
     ]
   },
   {
     "id": "dish_011",
     "name": "Chicken Afritada",
     "category": "Ulam",
-    "tags": ["chicken", "tomato-sauce", "karinderya-staple"],
+    "tags": [
+      "chicken",
+      "tomato-sauce",
+      "karinderya-staple"
+    ],
     "prep_time_minutes": 55,
     "servings": 5,
     "ingredients": [
-      { "name": "chicken", "quantity": 1, "unit": "kg", "substitutable": false },
-      { "name": "tomato sauce", "quantity": 250, "unit": "g", "substitutable": false },
-      { "name": "potato", "quantity": 3, "unit": "pcs", "substitutable": false },
-      { "name": "carrot", "quantity": 2, "unit": "pcs", "substitutable": false },
-      { "name": "bell pepper", "quantity": 1, "unit": "pc", "substitutable": true },
-      { "name": "garlic", "quantity": 4, "unit": "cloves", "substitutable": false }
+      {
+        "name": "chicken",
+        "quantity": 1,
+        "unit": "kg",
+        "substitutable": false
+      },
+      {
+        "name": "tomato sauce",
+        "quantity": 250,
+        "unit": "g",
+        "substitutable": false
+      },
+      {
+        "name": "potato",
+        "quantity": 3,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "carrot",
+        "quantity": 2,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "bell pepper",
+        "quantity": 1,
+        "unit": "pc",
+        "substitutable": true
+      },
+      {
+        "name": "garlic",
+        "quantity": 4,
+        "unit": "cloves",
+        "substitutable": false
+      }
     ]
   },
   {
     "id": "dish_012",
     "name": "Arroz Caldo",
     "category": "Sabaw",
-    "tags": ["chicken", "rice", "comfort-food"],
+    "tags": [
+      "chicken",
+      "rice",
+      "comfort-food"
+    ],
     "prep_time_minutes": 50,
     "servings": 5,
     "ingredients": [
-      { "name": "chicken", "quantity": 750, "unit": "g", "substitutable": false },
-      { "name": "rice", "quantity": 2, "unit": "cups", "substitutable": false },
-      { "name": "ginger", "quantity": 1, "unit": "thumb", "substitutable": false },
-      { "name": "garlic", "quantity": 5, "unit": "cloves", "substitutable": false },
-      { "name": "onion", "quantity": 1, "unit": "pc", "substitutable": true },
-      { "name": "fish sauce", "quantity": 3, "unit": "tbsp", "substitutable": true }
+      {
+        "name": "chicken",
+        "quantity": 750,
+        "unit": "g",
+        "substitutable": false
+      },
+      {
+        "name": "rice",
+        "quantity": 2,
+        "unit": "cups",
+        "substitutable": false
+      },
+      {
+        "name": "ginger",
+        "quantity": 1,
+        "unit": "thumb",
+        "substitutable": false
+      },
+      {
+        "name": "garlic",
+        "quantity": 5,
+        "unit": "cloves",
+        "substitutable": false
+      },
+      {
+        "name": "onion",
+        "quantity": 1,
+        "unit": "pc",
+        "substitutable": true
+      },
+      {
+        "name": "fish sauce",
+        "quantity": 3,
+        "unit": "tbsp",
+        "substitutable": true
+      }
     ]
+  },
+  {
+    "id": "scraped_1779524606305",
+    "name": "Better Beef Nilaga",
+    "category": "Ulam",
+    "prep_time_minutes": 45,
+    "servings": 4,
+    "ingredients": [
+      {
+        "name": "beef neck bone",
+        "quantity": 3,
+        "unit": "lbs.",
+        "substitutable": false
+      },
+      {
+        "name": "knorr beef cube",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "corn on the cob",
+        "quantity": 3,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "potatoes",
+        "quantity": 2,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "long green beans",
+        "quantity": 18,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "head cabbage",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "bok choy",
+        "quantity": 1,
+        "unit": "bunch",
+        "substitutable": false
+      },
+      {
+        "name": "water",
+        "quantity": 6,
+        "unit": "cups",
+        "substitutable": false
+      },
+      {
+        "name": "onion",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "garlic",
+        "quantity": 4,
+        "unit": "cloves",
+        "substitutable": false
+      },
+      {
+        "name": "cooking oil",
+        "quantity": 3,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "fish sauce and ground black pepper to taste",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      }
+    ]
+  },
+  {
+    "name": "Sinigang na Baboy with Gabi",
+    "category": "Ulam",
+    "prep_time_minutes": 40,
+    "servings": 6,
+    "ingredients": [
+      {
+        "name": "pork belly",
+        "quantity": 2,
+        "unit": "lbs.",
+        "substitutable": false
+      },
+      {
+        "name": "kangkong leaves",
+        "quantity": 2,
+        "unit": "cups",
+        "substitutable": false
+      },
+      {
+        "name": "long green chili pepper",
+        "quantity": 3,
+        "unit": "pieces",
+        "substitutable": false
+      },
+      {
+        "name": "tomato",
+        "quantity": 2,
+        "unit": "pieces",
+        "substitutable": false
+      },
+      {
+        "name": "daikon radish",
+        "quantity": 1,
+        "unit": "cup",
+        "substitutable": false
+      },
+      {
+        "name": "snake beans",
+        "quantity": 10,
+        "unit": "pieces",
+        "substitutable": false
+      },
+      {
+        "name": "onion",
+        "quantity": 1,
+        "unit": "piece",
+        "substitutable": false
+      },
+      {
+        "name": "okra",
+        "quantity": 15,
+        "unit": "pieces",
+        "substitutable": false
+      },
+      {
+        "name": "taro",
+        "quantity": 2,
+        "unit": "pieces",
+        "substitutable": false
+      },
+      {
+        "name": "water",
+        "quantity": 8,
+        "unit": "cups",
+        "substitutable": false
+      },
+      {
+        "name": "knorr sinigang sa sampaloc mix original",
+        "quantity": 2,
+        "unit": "packs",
+        "substitutable": false
+      },
+      {
+        "name": "fish sauce",
+        "quantity": 3,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "ground black pepper",
+        "quantity": 1,
+        "unit": "teaspoon",
+        "substitutable": false
+      }
+    ],
+    "id": "scraped_14"
+  },
+  {
+    "name": "Garlic Pepper Beef in Mushroom Gravy",
+    "category": "Ulam",
+    "prep_time_minutes": 40,
+    "servings": 4,
+    "ingredients": [
+      {
+        "name": "beef sirloin",
+        "quantity": 0.5,
+        "unit": "lbs",
+        "substitutable": false
+      },
+      {
+        "name": "garlic",
+        "quantity": 0.5,
+        "unit": "heads",
+        "substitutable": false
+      },
+      {
+        "name": "soy sauce",
+        "quantity": 2,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "oyster sauce",
+        "quantity": 3,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "ground black pepper",
+        "quantity": 0.625,
+        "unit": "teaspoon",
+        "substitutable": false
+      },
+      {
+        "name": "salt",
+        "quantity": 1.25,
+        "unit": "teaspoon",
+        "substitutable": false
+      },
+      {
+        "name": "cooking oil",
+        "quantity": 0.25,
+        "unit": "cup",
+        "substitutable": false
+      },
+      {
+        "name": "butter",
+        "quantity": 3,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "all-purpose flour",
+        "quantity": 4,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "button mushrooms",
+        "quantity": 14,
+        "unit": "oz",
+        "substitutable": false
+      },
+      {
+        "name": "onion powder",
+        "quantity": 0.5,
+        "unit": "teaspoon",
+        "substitutable": false
+      },
+      {
+        "name": "garlic powder",
+        "quantity": 0.25,
+        "unit": "teaspoon",
+        "substitutable": false
+      },
+      {
+        "name": "beef broth",
+        "quantity": 0.25,
+        "unit": "cups",
+        "substitutable": false
+      }
+    ],
+    "id": "scraped_15"
+  },
+  {
+    "name": "Balbacua Recipe",
+    "category": "Ulam",
+    "prep_time_minutes": 45,
+    "servings": 6,
+    "ingredients": [
+      {
+        "name": "cow trotters",
+        "quantity": 5,
+        "unit": "lbs.",
+        "substitutable": false
+      },
+      {
+        "name": "knorr beef cube",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "lemongrass",
+        "quantity": 1,
+        "unit": "bunch",
+        "substitutable": false
+      },
+      {
+        "name": "bell pepper",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "salted black beans",
+        "quantity": 3,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "green onions",
+        "quantity": 1,
+        "unit": "bunch",
+        "substitutable": false
+      },
+      {
+        "name": "jalapeno pepper",
+        "quantity": 3,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "ground black pepper",
+        "quantity": 1,
+        "unit": "teaspoon",
+        "substitutable": false
+      },
+      {
+        "name": "tomato sauce",
+        "quantity": 8,
+        "unit": "ounces",
+        "substitutable": false
+      },
+      {
+        "name": "water",
+        "quantity": 10,
+        "unit": "cups",
+        "substitutable": false
+      },
+      {
+        "name": "annatto powder",
+        "quantity": 2,
+        "unit": "teaspoons",
+        "substitutable": false
+      },
+      {
+        "name": "garlic",
+        "quantity": 5,
+        "unit": "cloves",
+        "substitutable": false
+      },
+      {
+        "name": "onion",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "knobs ginger",
+        "quantity": 2,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "fish sauce to taste",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "cooking oil",
+        "quantity": 3,
+        "unit": "tablespoons",
+        "substitutable": false
+      }
+    ],
+    "id": "scraped_16"
+  },
+  {
+    "name": "Japanese Curry Recipe",
+    "category": "Ulam",
+    "prep_time_minutes": 45,
+    "servings": 5,
+    "ingredients": [
+      {
+        "name": "beef",
+        "quantity": 2,
+        "unit": "lbs.",
+        "substitutable": false
+      },
+      {
+        "name": "knorr beef cube",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "potatoes",
+        "quantity": 2,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "carrots",
+        "quantity": 2,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "curry powder",
+        "quantity": 4,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "tomato ketchup",
+        "quantity": 3,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "worcestershire sauce",
+        "quantity": 3,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "honey",
+        "quantity": 3,
+        "unit": "teaspoons",
+        "substitutable": false
+      },
+      {
+        "name": "yellow onions",
+        "quantity": 2,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "garlic",
+        "quantity": 3,
+        "unit": "cloves",
+        "substitutable": false
+      },
+      {
+        "name": "water",
+        "quantity": 3,
+        "unit": "cups",
+        "substitutable": false
+      },
+      {
+        "name": "cornstarch",
+        "quantity": 1,
+        "unit": "tablespoon",
+        "substitutable": false
+      },
+      {
+        "name": "coffee",
+        "quantity": 1,
+        "unit": "cup",
+        "substitutable": false
+      },
+      {
+        "name": "cooking oil",
+        "quantity": 2,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "butter",
+        "quantity": 1,
+        "unit": "tablespoon",
+        "substitutable": false
+      },
+      {
+        "name": "grated cheddar cheese",
+        "quantity": 1,
+        "unit": "cup",
+        "substitutable": false
+      },
+      {
+        "name": "salt and ground black pepper to taste",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      }
+    ],
+    "id": "scraped_17"
+  },
+  {
+    "name": "Beef Empanada Recipe",
+    "category": "Ulam",
+    "prep_time_minutes": 40,
+    "servings": 4,
+    "ingredients": [
+      {
+        "name": "ground beef",
+        "quantity": 1,
+        "unit": "lb.",
+        "substitutable": false
+      },
+      {
+        "name": "raisins",
+        "quantity": 0.5,
+        "unit": "cup",
+        "substitutable": false
+      },
+      {
+        "name": "green peas",
+        "quantity": 0.5,
+        "unit": "cup",
+        "substitutable": false
+      },
+      {
+        "name": "yellow onion",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "beef broth",
+        "quantity": 0.5,
+        "unit": "cup",
+        "substitutable": false
+      },
+      {
+        "name": "salt",
+        "quantity": 1.5,
+        "unit": "teaspoon",
+        "substitutable": false
+      },
+      {
+        "name": "paprika",
+        "quantity": 0.5,
+        "unit": "teaspoon",
+        "substitutable": false
+      },
+      {
+        "name": "ground black pepper",
+        "quantity": 0.5,
+        "unit": "teaspoon",
+        "substitutable": false
+      },
+      {
+        "name": "granulated white sugar",
+        "quantity": 4,
+        "unit": "teaspoon",
+        "substitutable": false
+      },
+      {
+        "name": "cooking oil",
+        "quantity": 5,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "ap flour",
+        "quantity": 3,
+        "unit": "cups",
+        "substitutable": false
+      },
+      {
+        "name": "unsalted butter",
+        "quantity": 1,
+        "unit": "cup",
+        "substitutable": false
+      },
+      {
+        "name": "baking powder",
+        "quantity": 0.5,
+        "unit": "teaspoon",
+        "substitutable": false
+      },
+      {
+        "name": "ice cold water",
+        "quantity": 6,
+        "unit": "tablespoons",
+        "substitutable": false
+      }
+    ],
+    "id": "scraped_18"
+  },
+  {
+    "name": "No Bake Macaroni",
+    "category": "Ulam",
+    "prep_time_minutes": 45,
+    "servings": 5,
+    "ingredients": [
+      {
+        "name": "cdo home style corned beef in pasta sauce",
+        "quantity": 520,
+        "unit": "grams",
+        "substitutable": false
+      },
+      {
+        "name": "elbow macaroni",
+        "quantity": 1,
+        "unit": "lb.",
+        "substitutable": false
+      },
+      {
+        "name": "onion",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "garlic",
+        "quantity": 5,
+        "unit": "cloves",
+        "substitutable": false
+      },
+      {
+        "name": "cooking oil",
+        "quantity": 3,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "parsley",
+        "quantity": 2,
+        "unit": "teaspoons",
+        "substitutable": false
+      },
+      {
+        "name": "cheddar cheese",
+        "quantity": 1,
+        "unit": "cup",
+        "substitutable": false
+      },
+      {
+        "name": "salt and ground black pepper to taste",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      }
+    ],
+    "id": "scraped_19"
+  },
+  {
+    "name": "Loco Moco Recipe",
+    "category": "Ulam",
+    "prep_time_minutes": 45,
+    "servings": 4,
+    "ingredients": [
+      {
+        "name": "patties cdo ulam burger",
+        "quantity": 6,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "eggs",
+        "quantity": 3,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "cooking oil",
+        "quantity": 4,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "parsley",
+        "quantity": 2,
+        "unit": "teaspoons",
+        "substitutable": false
+      },
+      {
+        "name": "button mushroom",
+        "quantity": 1,
+        "unit": "cup",
+        "substitutable": false
+      },
+      {
+        "name": "onion",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "beef broth",
+        "quantity": 2,
+        "unit": "cups",
+        "substitutable": false
+      },
+      {
+        "name": "soy sauce",
+        "quantity": 1,
+        "unit": "tablespoon",
+        "substitutable": false
+      },
+      {
+        "name": "worcestershire sauce",
+        "quantity": 1,
+        "unit": "tablespoon",
+        "substitutable": false
+      },
+      {
+        "name": "cornstarch",
+        "quantity": 2,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "salt and ground black pepper to taste",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      }
+    ],
+    "id": "scraped_20"
+  },
+  {
+    "name": "Loaded Nachos Recipe",
+    "category": "Ulam",
+    "prep_time_minutes": 45,
+    "servings": 5,
+    "ingredients": [
+      {
+        "name": "cdo home style corned beef in pasta sauce",
+        "quantity": 260,
+        "unit": "grams",
+        "substitutable": false
+      },
+      {
+        "name": "tortilla chips",
+        "quantity": 16,
+        "unit": "oz.",
+        "substitutable": false
+      },
+      {
+        "name": "onion",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "taco seasoning",
+        "quantity": 1,
+        "unit": "teaspoons",
+        "substitutable": false
+      },
+      {
+        "name": "cooking oil",
+        "quantity": 2,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "cheese dip",
+        "quantity": 120,
+        "unit": "grams",
+        "substitutable": false
+      },
+      {
+        "name": "green onions",
+        "quantity": 1,
+        "unit": "cup",
+        "substitutable": false
+      },
+      {
+        "name": "black olives",
+        "quantity": 1,
+        "unit": "cup",
+        "substitutable": false
+      },
+      {
+        "name": "tomato",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "cheddar cheese",
+        "quantity": 0.5,
+        "unit": "cup",
+        "substitutable": false
+      }
+    ],
+    "id": "scraped_21"
+  },
+  {
+    "name": "Pinoy Burger Steak Recipe",
+    "category": "Ulam",
+    "prep_time_minutes": 45,
+    "servings": 4,
+    "ingredients": [
+      {
+        "name": "patties cdo ulam burger",
+        "quantity": 6,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "toasted garlic",
+        "quantity": 3,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "parsley",
+        "quantity": 1,
+        "unit": "tablespoon",
+        "substitutable": false
+      },
+      {
+        "name": "cooking oil",
+        "quantity": 1,
+        "unit": "tablespoon",
+        "substitutable": false
+      },
+      {
+        "name": "button mushroom",
+        "quantity": 0.75,
+        "unit": "cup",
+        "substitutable": false
+      },
+      {
+        "name": "butter",
+        "quantity": 3,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "all-purpose flour",
+        "quantity": 4,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "beef bouillon",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "worcestershire sauce",
+        "quantity": 1,
+        "unit": "teaspoon",
+        "substitutable": false
+      },
+      {
+        "name": "water",
+        "quantity": 0.25,
+        "unit": "cup",
+        "substitutable": false
+      },
+      {
+        "name": "salt and ground black pepper to taste",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      }
+    ],
+    "id": "scraped_22"
+  },
+  {
+    "name": "Filipino Style Beef Steak",
+    "category": "Ulam",
+    "prep_time_minutes": 45,
+    "servings": 4,
+    "ingredients": [
+      {
+        "name": "beef",
+        "quantity": 2,
+        "unit": "lbs.",
+        "substitutable": false
+      },
+      {
+        "name": "knorr beef cube",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "onions",
+        "quantity": 2,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "garlic",
+        "quantity": 4,
+        "unit": "cloves",
+        "substitutable": false
+      },
+      {
+        "name": "peppercorns",
+        "quantity": 1,
+        "unit": "teaspoon",
+        "substitutable": false
+      },
+      {
+        "name": "cornstarch",
+        "quantity": 2,
+        "unit": "teaspoons",
+        "substitutable": false
+      },
+      {
+        "name": "brown sugar",
+        "quantity": 1,
+        "unit": "teaspoons",
+        "substitutable": false
+      },
+      {
+        "name": "soy sauce",
+        "quantity": 6,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "lemon",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "water",
+        "quantity": 2,
+        "unit": "cups",
+        "substitutable": false
+      },
+      {
+        "name": "cooking oil",
+        "quantity": 3,
+        "unit": "tablespoons",
+        "substitutable": false
+      }
+    ],
+    "id": "scraped_23"
   }
 ]

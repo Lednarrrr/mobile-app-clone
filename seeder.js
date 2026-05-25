@@ -1,0 +1,1 @@
+const targetPath = path.join(__dirname, '../src/data/recipes.json');

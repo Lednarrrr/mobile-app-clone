@@ -23,6 +23,8 @@ function addColumnIfMissing(tableName, columnName, columnDefinition) {
 }
 
 export function initInventoryDatabase() {
+  // CRITICAL FIX: Changed table name to 'ingredients' 
+  // and added the missing created_at / updated_at columns!
   db.execSync(`
     CREATE TABLE IF NOT EXISTS ingredients (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,20 +33,60 @@ export function initInventoryDatabase() {
       unit TEXT,
       category TEXT,
       expiry_date TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
 
-  addColumnIfMissing('ingredients', 'category', 'category TEXT');
-  addColumnIfMissing('ingredients', 'expiry_date', 'expiry_date TEXT');
-  addColumnIfMissing('ingredients', 'updated_at', 'updated_at TEXT');
-
-  db.runSync(`
-    UPDATE ingredients
-    SET updated_at = COALESCE(updated_at, created_at, CURRENT_TIMESTAMP)
-    WHERE updated_at IS NULL;
+  // --- Custom Recipes Table ---
+  db.execSync(`
+    CREATE TABLE IF NOT EXISTS custom_recipes (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      category TEXT,
+      prep_time_minutes INTEGER,
+      servings INTEGER,
+      ingredients TEXT 
+    );
   `);
+}
+
+// --- Add a Custom Recipe ---
+export function addCustomRecipe(recipeObject) {
+  const ingredientsString = JSON.stringify(recipeObject.ingredients);
+  
+  db.runSync(
+    `INSERT INTO custom_recipes (id, name, category, prep_time_minutes, servings, ingredients) 
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [
+      recipeObject.id, 
+      recipeObject.name, 
+      recipeObject.category, 
+      recipeObject.prep_time_minutes, 
+      recipeObject.servings, 
+      ingredientsString
+    ]
+  );
+}
+
+// --- Get all Custom Recipes ---
+export function getCustomRecipes() {
+  const rows = db.getAllSync(`SELECT * FROM custom_recipes`);
+  
+  return rows.map(row => {
+    let parsedIngredients = [];
+    try {
+      // Defensive parsing just in case the SQLite string is corrupted
+      parsedIngredients = JSON.parse(row.ingredients);
+    } catch (e) {
+      console.warn(`Failed to parse ingredients for recipe ${row.id}`);
+    }
+    
+    return {
+      ...row,
+      ingredients: parsedIngredients
+    };
+  });
 }
 
 export function getIngredients() {
@@ -104,8 +146,8 @@ export function addIngredient(name, quantity, unit, category = '', expiryDate = 
   );
 }
 
-export function addStarterInventory(ingredients) {
-  ingredients.forEach((ingredient) => {
+export function addStarterInventory(ingredientsList) {
+  ingredientsList.forEach((ingredient) => {
     addIngredient(
       ingredient.name,
       ingredient.quantity,
