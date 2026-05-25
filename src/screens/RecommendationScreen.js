@@ -1,392 +1,166 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
+import STATIC_RECIPES from "../data/recipes.json";
 
-import { getRecipeRecommendations } from "../utils/recommendationEngine";
 
-const CATEGORIES = [
-  "All",
-  "Ulam",
-  "Sabaw",
-  "Prito",
-  "Gulay",
-  "Ihaw",
-  "Kakanin",
-];
+export default function RecommendationScreen({ customRecipes = [] }) {
+  // State to manage which list the user is currently viewing
+  const [activeTab, setActiveTab] = useState("standard"); // 'standard' or 'custom'
+ 
+  const displayRecipes = STATIC_RECIPES.slice(0, 10);
 
-export default function RecommendationScreen({ ingredients }) {
-  const [selectedCategory, setSelectedCategory] = useState("All");
-
-  const recommendations = useMemo(
-    () => getRecipeRecommendations(ingredients, { category: selectedCategory }),
-    [ingredients, selectedCategory],
-  );
-
-  const readyCount = recommendations.filter(
-    (recipe) => recipe.status === "Ready to Cook",
-  ).length;
-
-  const handleAddRecipe = () => {
-    // TODO: Implement add recipe functionality
-    console.log("Add recipe pressed");
-  };
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.heroPanel}>
-        <View style={styles.heroIcon}>
-          <Ionicons name="sparkles-outline" size={24} color="#f7f3ea" />
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.screenTitle}>Cookbook</Text>
+          <Text style={styles.screenSubtitle}>Manage and view all your karinderya recipes.</Text>
         </View>
-        <View style={styles.heroTextGroup}>
-          <Text style={styles.heroTitle}>What can I cook right now?</Text>
-          <Text style={styles.heroText}>
-            {recommendations.length} matches found, {readyCount} ready to cook.
-          </Text>
+
+
+        {/* --- THE SEGMENTED TOGGLE --- */}
+        <View style={styles.toggleContainer}>
+          <Pressable
+            style={[styles.toggleButton, activeTab === "standard" && styles.toggleButtonActive]}
+            onPress={() => setActiveTab("standard")}
+          >
+            <Text style={[styles.toggleText, activeTab === "standard" && styles.toggleTextActive]}>
+              Standard Menu
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[styles.toggleButton, activeTab === "custom" && styles.toggleButtonActive]}
+            onPress={() => setActiveTab("custom")}
+          >
+            <Text style={[styles.toggleText, activeTab === "custom" && styles.toggleTextActive]}>
+              My Recipes ({customRecipes.length})
+            </Text>
+          </Pressable>
+        </View>
+
+
+        {/* --- STANDARD MENU VIEW --- */}
+        {activeTab === "standard" && (
+          <View style={{ marginBottom: 24, marginTop: 16 }}>
+            <View style={styles.badgeRow}>
+              <Ionicons name="restaurant-outline" size={18} color="#2D6A4F" />
+              <Text style={styles.badgeText}>Suggested Built-in Menu</Text>
+            </View>
+           
+            {displayRecipes.map((recipe) => (
+              <RecipeCard key={recipe.id} recipe={recipe} />
+            ))}
+          </View>
+        )}
+
+
+        {/* --- CUSTOM RECIPES VIEW --- */}
+        {activeTab === "custom" && (
+          <View style={{ marginBottom: 24, marginTop: 16 }}>
+            <View style={styles.badgeRow}>
+              <Ionicons name="book-outline" size={18} color="#d4a20b" />
+              <Text style={[styles.badgeText, { color: '#d4a20b' }]}>Your Custom Creations</Text>
+            </View>
+
+
+            {customRecipes.length === 0 ? (
+              <View style={styles.emptyPanel}>
+                <Ionicons name="book-outline" size={48} color="#9ca3af" style={{ marginBottom: 12 }} />
+                <Text style={styles.emptyTitle}>No Custom Recipes Yet</Text>
+                <Text style={styles.emptyText}>Tap the + button to teach the app your first custom dish!</Text>
+              </View>
+            ) : (
+              customRecipes.map((recipe) => (
+                <RecipeCard key={recipe.id} recipe={recipe} />
+              ))
+            )}
+          </View>
+        )}
+
+
+      </ScrollView>
+    </View>
+  );
+}
+
+
+// Sub-component for individual recipe UI
+function RecipeCard({ recipe }) {
+  return (
+    <View style={styles.card}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.recipeName}>{recipe.name}</Text>
+        <Text style={styles.categoryBadge}>{recipe.category || "Main"}</Text>
+      </View>
+     
+      <View style={styles.metaRow}>
+        <View style={styles.metaItem}>
+          <Ionicons name="time-outline" size={16} color="#6b7280" />
+          <Text style={styles.metaText}>{recipe.prep_time_minutes || 30} mins</Text>
+        </View>
+        <View style={styles.metaItem}>
+          <Ionicons name="people-outline" size={16} color="#6b7280" />
+          <Text style={styles.metaText}>{recipe.servings || 4} servings</Text>
         </View>
       </View>
 
-      <Pressable style={styles.addRecipeButton} onPress={handleAddRecipe}>
-        <Ionicons name="add" size={20} color="#ffffff" />
-        <Text style={styles.addRecipeButtonText}>Add Recipe</Text>
-      </Pressable>
 
-      <ScrollView
-        horizontal
-        contentContainerStyle={styles.filterRow}
-        showsHorizontalScrollIndicator={false}
-      >
-        {CATEGORIES.map((category) => {
-          const isSelected = selectedCategory === category;
-
-          return (
-            <Pressable
-              key={category}
-              style={[styles.filterButton, isSelected && styles.activeFilter]}
-              onPress={() => setSelectedCategory(category)}
-            >
-              <Text
-                style={[
-                  styles.filterButtonText,
-                  isSelected && styles.activeFilterText,
-                ]}
-              >
-                {category}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-
-      <View style={styles.sectionHeader}>
-        <Text style={styles.screenTitle}>Recipe matches</Text>
-        <Text style={styles.screenSubtitle}>
-          Dishes ranked by available stock and required ingredients.
+      <View style={styles.progressBox}>
+        <Text style={styles.progressText}>Ingredients required:</Text>
+        <Text style={styles.ingredientListText}>
+          {recipe.ingredients?.map(ing => {
+            // Handle both JSON string format and our Custom Recipe object format
+            if (typeof ing === 'string') return ing;
+            if (ing.name) return `${ing.quantity || ''} ${ing.unit || ''} ${ing.name}`.trim();
+            return '';
+          }).join(", ") || "Ingredients not listed"}
         </Text>
       </View>
-
-      {recommendations.length === 0 ? (
-        <View style={styles.emptyPanel}>
-          <Text style={styles.emptyTitle}>No matches yet</Text>
-          <Text style={styles.emptyText}>
-            Add more ingredients or switch category to see possible dishes.
-          </Text>
-        </View>
-      ) : (
-        recommendations.map((recipe) => (
-          <RecipeCard key={recipe.id} recipe={recipe} />
-        ))
-      )}
-    </ScrollView>
-  );
-}
-
-function RecipeCard({ recipe }) {
-  const isReady = recipe.status === "Ready to Cook";
-
-  return (
-    <View style={styles.recipeCard}>
-      <View style={styles.recipeTopRow}>
-        <View style={styles.recipeNameGroup}>
-          <Text style={styles.recipeName}>{recipe.name}</Text>
-          <Text style={styles.recipeCategory}>
-            {recipe.category} | {recipe.prep_time_minutes} min |{" "}
-            {recipe.servings} servings
-          </Text>
-        </View>
-
-        <View
-          style={[
-            styles.statusPill,
-            isReady ? styles.readyPill : styles.almostPill,
-          ]}
-        >
-          <Ionicons
-            name={isReady ? "checkmark-circle" : "alert-circle"}
-            size={14}
-            color={isReady ? "#1f6a45" : "#9a5b13"}
-          />
-          <Text
-            style={[
-              styles.statusPillText,
-              isReady ? styles.readyPillText : styles.almostPillText,
-            ]}
-          >
-            {isReady ? "Ready" : "Almost"}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.progressHeader}>
-        <Text style={styles.progressLabel}>Ingredient match</Text>
-        <Text style={styles.progressValue}>{recipe.matchPercentage}%</Text>
-      </View>
-
-      <View style={styles.progressTrack}>
-        <View
-          style={[styles.progressFill, { width: `${recipe.matchPercentage}%` }]}
-        />
-      </View>
-
-      <View style={styles.recipeDetails}>
-        <DetailBlock
-          label="Have"
-          value={recipe.matchedIngredients.join(", ")}
-        />
-        <DetailBlock
-          label="Missing required"
-          value={
-            recipe.missingIngredients.length > 0
-              ? recipe.missingIngredients.join(", ")
-              : "None"
-          }
-        />
-        {recipe.optionalMissingIngredients?.length > 0 && (
-          <DetailBlock
-            label="Optional add-ons"
-            value={recipe.optionalMissingIngredients.join(", ")}
-          />
-        )}
-      </View>
     </View>
   );
 }
 
-function DetailBlock({ label, value }) {
-  return (
-    <View style={styles.detailBlock}>
-      <Text style={styles.detailLabel}>{label}</Text>
-      <Text style={styles.detailText}>{value}</Text>
-    </View>
-  );
-}
 
 const styles = StyleSheet.create({
-  content: {
-    paddingBottom: 100,
-    paddingHorizontal: 16,
-  },
-  heroPanel: {
-    alignItems: "center",
-    backgroundColor: "#1f6a45",
-    borderRadius: 8,
-    flexDirection: "row",
-    gap: 13,
-    marginBottom: 14,
-    padding: 16,
-  },
-  heroIcon: {
-    alignItems: "center",
-    backgroundColor: "#2f7d50",
-    borderRadius: 8,
-    height: 44,
-    justifyContent: "center",
-    width: 44,
-  },
-  heroTextGroup: {
-    flex: 1,
-  },
-  heroTitle: {
-    color: "#f7f3ea",
-    fontSize: 18,
-    fontWeight: "900",
-  },
-  heroText: {
-    color: "#dcebdd",
-    fontSize: 13,
-    lineHeight: 18,
-    marginTop: 3,
-  },
-  addRecipeButton: {
-    alignItems: "center",
-    backgroundColor: "#2D6A4F",
-    borderRadius: 12,
-    flexDirection: "row",
-    gap: 8,
-    justifyContent: "center",
-    marginBottom: 14,
-    paddingVertical: 14,
-  },
-  addRecipeButtonText: {
-    color: "#ffffff",
-    fontSize: 15,
-    fontWeight: "900",
-  },
-  filterRow: {
-    gap: 8,
-    paddingBottom: 14,
-  },
-  filterButton: {
-    backgroundColor: "#ffffff",
-    borderColor: "#eadfcb",
-    borderRadius: 8,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  activeFilter: {
-    backgroundColor: "#fff0d0",
-    borderColor: "#b35f2b",
-  },
-  filterButtonText: {
-    color: "#6a6f69",
-    fontSize: 13,
-    fontWeight: "900",
-  },
-  activeFilterText: {
-    color: "#9a5b13",
-  },
-  sectionHeader: {
-    marginBottom: 14,
-  },
-  screenTitle: {
-    color: "#1c2a22",
-    fontSize: 23,
-    fontWeight: "900",
-  },
-  screenSubtitle: {
-    color: "#69746c",
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 3,
-  },
-  recipeCard: {
-    backgroundColor: "#ffffff",
-    borderColor: "#eadfcb",
-    borderRadius: 8,
-    borderWidth: 1,
-    marginBottom: 12,
-    padding: 16,
-  },
-  recipeTopRow: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    gap: 10,
-    justifyContent: "space-between",
-  },
-  recipeNameGroup: {
-    flex: 1,
-  },
-  recipeName: {
-    color: "#1c2a22",
-    fontSize: 18,
-    fontWeight: "900",
-  },
-  recipeCategory: {
-    color: "#7a8179",
-    fontSize: 13,
-    fontWeight: "700",
-    marginTop: 3,
-  },
-  statusPill: {
-    alignItems: "center",
-    borderRadius: 8,
-    flexDirection: "row",
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-  },
-  readyPill: {
-    backgroundColor: "#e1f3e7",
-  },
-  almostPill: {
-    backgroundColor: "#fff0d0",
-  },
-  statusPillText: {
-    fontSize: 12,
-    fontWeight: "900",
-  },
-  readyPillText: {
-    color: "#1f6a45",
-  },
-  almostPillText: {
-    color: "#9a5b13",
-  },
-  progressHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 16,
-  },
-  progressLabel: {
-    color: "#69746c",
-    fontSize: 13,
-    fontWeight: "800",
-  },
-  progressValue: {
-    color: "#1c2a22",
-    fontSize: 13,
-    fontWeight: "900",
-  },
-  progressTrack: {
-    backgroundColor: "#edf0ea",
-    borderRadius: 8,
-    height: 9,
-    marginTop: 8,
-    overflow: "hidden",
-  },
-  progressFill: {
-    backgroundColor: "#2f7d50",
-    borderRadius: 8,
-    height: "100%",
-  },
-  recipeDetails: {
-    borderTopColor: "#f0e7d8",
-    borderTopWidth: 1,
-    marginTop: 15,
-    paddingTop: 13,
-  },
-  detailBlock: {
-    marginBottom: 10,
-  },
-  detailLabel: {
-    color: "#1c2a22",
-    fontSize: 13,
-    fontWeight: "900",
-    marginBottom: 4,
-  },
-  detailText: {
-    color: "#69746c",
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  emptyPanel: {
-    backgroundColor: "#ffffff",
-    borderColor: "#eadfcb",
-    borderRadius: 8,
-    borderWidth: 1,
-    padding: 18,
-  },
-  emptyTitle: {
-    color: "#1c2a22",
-    fontSize: 18,
-    fontWeight: "900",
-    marginBottom: 5,
-  },
-  emptyText: {
-    color: "#69746c",
-    fontSize: 15,
-    lineHeight: 21,
-  },
+  container: { flex: 1, backgroundColor: "#F8F5EE" },
+  scrollContent: { padding: 16, paddingBottom: 100 },
+  sectionHeader: { marginBottom: 20 },
+  screenTitle: { fontSize: 28, fontWeight: "900", color: "#111827" },
+  screenSubtitle: { fontSize: 15, color: "#6b7280", marginTop: 4 },
+ 
+  // Toggle Styles
+  toggleContainer: { flexDirection: 'row', backgroundColor: '#e5e7eb', padding: 4, borderRadius: 12, marginBottom: 8 },
+  toggleButton: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 8 },
+  toggleButtonActive: { backgroundColor: '#ffffff', shadowColor: '#000', shadowOpacity: 0.05, shadowOffset: { width: 0, height: 2 }, shadowRadius: 4, elevation: 2 },
+  toggleText: { fontSize: 14, fontWeight: '600', color: '#6b7280' },
+  toggleTextActive: { color: '#111827', fontWeight: '800' },
+
+
+  badgeRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 6 },
+  badgeText: { fontSize: 16, fontWeight: '800', color: '#2D6A4F' },
+ 
+  card: { backgroundColor: "#ffffff", borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: "#e5e7eb", shadowColor: "#000", shadowOpacity: 0.03, shadowOffset: { width: 0, height: 2 }, shadowRadius: 4, elevation: 1 },
+  cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
+  recipeName: { fontSize: 18, fontWeight: "800", color: "#111827", flex: 1, textTransform: "capitalize" },
+  categoryBadge: { backgroundColor: "#f3f4f6", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, fontSize: 12, fontWeight: "700", color: "#4b5563", overflow: "hidden" },
+ 
+  metaRow: { flexDirection: "row", gap: 16, marginBottom: 16 },
+  metaItem: { flexDirection: "row", alignItems: "center", gap: 4 },
+  metaText: { fontSize: 13, color: "#6b7280", fontWeight: "600" },
+
+
+  progressBox: { backgroundColor: "#f9fafb", padding: 12, borderRadius: 12, borderWidth: 1, borderColor: "#f3f4f6" },
+  progressText: { fontSize: 13, fontWeight: "700", marginBottom: 4, color: "#4b5563" },
+  ingredientListText: { fontSize: 13, color: "#6b7280", textTransform: "capitalize", lineHeight: 18 },
+
+
+  emptyPanel: { alignItems: "center", justifyContent: "center", padding: 32, marginTop: 20, backgroundColor: "#ffffff", borderRadius: 16, borderWidth: 1, borderColor: "#e5e7eb", borderStyle: "dashed" },
+  emptyTitle: { fontSize: 16, fontWeight: "800", color: "#111827", marginBottom: 8 },
+  emptyText: { fontSize: 14, color: "#6b7280", textAlign: "center", lineHeight: 22 },
 });
+
+
+
+
