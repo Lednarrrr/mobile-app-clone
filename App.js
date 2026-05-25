@@ -166,7 +166,7 @@ export default function App() {
 
 
   const recommendations = getRecipeRecommendations(ingredients);
-  const shoppingList = getShoppingListFromRecommendations(recommendations);
+  const shoppingList = getShoppingListFromRecommendations(recommendations, ingredients);
   const readyCount = recommendations.filter((recipe) => recipe.status === "Ready to Cook").length;
   const expiringSoonCount = getExpiringSoonCount(ingredients);
 
@@ -482,7 +482,9 @@ export default function App() {
 
 
           {activeScreen === "cook" && (
-            <RecommendationScreen customRecipes={customRecipes} />
+            <RecommendationScreen 
+              recommendations={recommendations} // <--- ADD THIS LINE
+            />
           )}
 
 
@@ -816,32 +818,177 @@ export default function App() {
   );
 }
 
-
 function ShoppingList({ shoppingList }) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedRecipe, setSelectedRecipe] = useState(null); 
+  
+  // --- ADVANCED FILTER STATES ---
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState("All"); // 'All', 'Standard', 'Custom'
+  const [categoryFilter, setCategoryFilter] = useState("All"); 
+  
+  const CATEGORIES = ["All", "Ulam", "Sabaw", "Prito", "Gulay", "Ihaw", "Kakanin", "Other"];
+
+  const processedList = useMemo(() => {
+    let result = [...shoppingList];
+    
+    // 1. Text Search
+    if (searchQuery.trim()) {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter(item => item.recipeName.toLowerCase().includes(lowerQuery));
+    }
+
+    // 2. Filter by Source (Built-in vs Custom)
+    if (sourceFilter === "Standard") {
+      result = result.filter(item => !String(item.id).startsWith("custom_"));
+    } else if (sourceFilter === "Custom") {
+      result = result.filter(item => String(item.id).startsWith("custom_"));
+    }
+
+    // 3. Filter by Category
+    if (categoryFilter !== "All") {
+      result = result.filter(item => item.category === categoryFilter || (categoryFilter === "Other" && !CATEGORIES.includes(item.category)));
+    }
+
+    return result.sort((a, b) => a.recipeName.localeCompare(b.recipeName));
+  }, [shoppingList, searchQuery, sourceFilter, categoryFilter]);
+
   return (
-    <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.screenTitle}>Shopping list</Text>
-        <Text style={styles.screenSubtitle}>Missing required ingredients grouped from your recipe matches.</Text>
+    <View style={{ flex: 1, backgroundColor: "#F8F5EE" }}>
+      
+      {/* HEADER WITH SEARCH & FILTER BUTTON */}
+      <View style={styles.shoppingHeader}>
+        <View>
+          <Text style={styles.shoppingHeaderTitle}>Dish Requirements</Text>
+          <Text style={styles.shoppingHeaderSubtitle}>Find what you lack to cook specific dishes.</Text>
+        </View>
+
+        <View style={styles.filterContainer}>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            
+            <View style={[styles.searchBox, { flex: 1 }]}>
+              <Ionicons name="search-outline" size={18} color="#9ca3af" />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search dishes..."
+                placeholderTextColor="#9ca3af"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              {searchQuery.length > 0 && (
+                <Pressable onPress={() => setSearchQuery("")} style={{ padding: 4 }}>
+                  <Ionicons name="close-circle" size={18} color="#9ca3af" />
+                </Pressable>
+              )}
+            </View>
+
+            {/* Advanced Filter Toggle Button */}
+            <Pressable 
+              style={[styles.advancedFilterBtn, isFilterMenuOpen && styles.advancedFilterBtnActive]} 
+              onPress={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
+            >
+              <Ionicons name="options" size={20} color={isFilterMenuOpen ? "#05943c" : "#111827"} />
+            </Pressable>
+            
+          </View>
+
+          {/* EXPANDING ADVANCED FILTER MENU */}
+          {isFilterMenuOpen && (
+            <View style={styles.advancedFilterMenu}>
+              
+              <Text style={styles.filterLabel}>Recipe Source</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+                {["All", "Standard", "Custom"].map(source => (
+                  <Pressable 
+                    key={source} 
+                    style={[styles.filterChip, sourceFilter === source && styles.filterChipActive]}
+                    onPress={() => setSourceFilter(source)}
+                  >
+                    <Text style={[styles.filterChipText, sourceFilter === source && styles.filterChipTextActive]}>
+                      {source === "Standard" ? "Built-in Menu" : source === "Custom" ? "My Recipes" : "Everything"}
+                    </Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+
+              <Text style={styles.filterLabel}>Dish Category</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+                {CATEGORIES.map(cat => (
+                  <Pressable 
+                    key={cat} 
+                    style={[styles.filterChip, categoryFilter === cat && styles.filterChipActive]}
+                    onPress={() => setCategoryFilter(cat)}
+                  >
+                    <Text style={[styles.filterChipText, categoryFilter === cat && styles.filterChipTextActive]}>{cat}</Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+
+            </View>
+          )}
+        </View>
       </View>
 
+      {/* DISH LIST */}
+      <ScrollView contentContainerStyle={styles.shoppingScroll} showsVerticalScrollIndicator={false}>
+        {processedList.length === 0 ? (
+          <EmptyPanel
+            title={searchQuery || sourceFilter !== "All" || categoryFilter !== "All" ? "No dishes match filters" : "No missing ingredients"}
+            text={searchQuery || sourceFilter !== "All" || categoryFilter !== "All" ? "Try adjusting your advanced filters or search." : "You have all the ingredients for your matched dishes!"}
+          />
+        ) : (
+          processedList.map((item) => (
+            <Pressable key={item.id} style={styles.shoppingItem} onPress={() => setSelectedRecipe(item)}>
+              <View style={[styles.shoppingIcon, { backgroundColor: '#eefcf5' }]}>
+                <Ionicons name="restaurant" size={24} color="#05943c" />
+              </View>
+              <View style={styles.shoppingInfo}>
+                <Text style={styles.shoppingName} numberOfLines={1}>{item.recipeName}</Text>
+                <Text style={styles.shoppingMeta}>Lacking {item.missingIngredients.length} ingredient{item.missingIngredients.length > 1 ? "s" : ""}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#d1d5db" />
+            </Pressable>
+          ))
+        )}
+      </ScrollView>
 
-      {shoppingList.length === 0 ? (
-        <EmptyPanel title="Nothing to buy yet" text="Recipe matches with missing required ingredients will appear here." />
-      ) : (
-        shoppingList.map((item) => (
-          <View key={item.name} style={styles.shoppingItem}>
-            <View style={styles.shoppingIcon}>
-              <Ionicons name="add-outline" size={20} color="#2D6A4F" />
+      {/* POPUP MODAL FOR MISSING INGREDIENTS */}
+      <Modal visible={!!selectedRecipe} transparent animationType="slide">
+        <View style={styles.modalBackdrop}>
+          <Pressable style={StyleSheet.absoluteFillObject} onPress={() => setSelectedRecipe(null)} />
+          <View style={[styles.modalSheet, { maxHeight: '80%' }]}>
+            
+            <View style={styles.modalHeaderRow}>
+              <View style={styles.modalHeaderSpacer} />
+              <Text style={styles.modalTitle}>{selectedRecipe?.recipeName}</Text>
+              <Pressable style={styles.modalClose} onPress={() => setSelectedRecipe(null)}>
+                <Ionicons name="close" size={18} color="#111827" />
+              </Pressable>
             </View>
-            <View style={styles.shoppingInfo}>
-              <Text style={styles.shoppingName}>{item.name}</Text>
-              <Text style={styles.shoppingMeta}>Needed by {item.recipeCount} matched recipe{item.recipeCount > 1 ? "s" : ""}</Text>
-            </View>
+            
+            <Text style={styles.modalFieldLabel}>You are missing:</Text>
+            
+            <ScrollView style={{ marginTop: 8 }} showsVerticalScrollIndicator={false}>
+              {selectedRecipe?.missingIngredients.map((ing, idx) => {
+                const name = typeof ing === 'string' ? ing : (ing.name || 'Unknown');
+                const qty = typeof ing === 'object' && ing.quantity ? `${ing.quantity} ` : '';
+                const unit = typeof ing === 'object' && ing.unit ? `${ing.unit} ` : '';
+                
+                return (
+                  <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, backgroundColor: '#fef2f2', padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#fecaca' }}>
+                    <Ionicons name="cart-outline" size={20} color="#dc2626" style={{ marginRight: 12 }} />
+                    <Text style={{ fontSize: 15, color: '#111827', textTransform: 'capitalize', fontWeight: '600' }}>
+                      {qty}{unit}{name}
+                    </Text>
+                  </View>
+                );
+              })}
+            </ScrollView>
+
           </View>
-        ))
-      )}
-    </ScrollView>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
@@ -916,7 +1063,7 @@ const styles = StyleSheet.create({
   expiryDoneText: { color: "#111827", fontSize: 14, fontWeight: "700" },
   modalPrimaryButton: { alignItems: "center", backgroundColor: "#d4a20b", borderRadius: 16, marginTop: 18, paddingVertical: 14 },
   modalPrimaryText: { color: "#ffffff", fontSize: 15, fontWeight: "900" },
- 
+  
   suggestionMenu: {
     backgroundColor: '#f9fafb',
     borderColor: '#e5e7eb',
@@ -950,10 +1097,183 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize'
   },
 
-
   actionMenuButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f9fafb', padding: 16, borderRadius: 16, marginBottom: 12, borderWidth: 1, borderColor: '#e5e7eb' },
   actionMenuIconWrap: { width: 48, height: 48, borderRadius: 12, backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'center', marginRight: 16, shadowColor: '#000', shadowOpacity: 0.05, shadowOffset: { width: 0, height: 2 }, shadowRadius: 4, elevation: 2 },
   actionMenuTitle: { fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 2 },
   actionMenuSubtitle: { fontSize: 13, color: '#6b7280' },
+
+  // --- SHOPPING LIST STYLES (Your custom header tweaks) ---
+  shoppingHeader: {
+    backgroundColor: "#05943c", 
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
+    marginBottom: 40,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  shoppingHeaderTitle: {
+    fontSize: 26,
+    fontWeight: "900",
+    color: "#ffffff",
+  },
+  shoppingHeaderSubtitle: {
+    fontSize: 15,
+    color: "#eefcf5",
+    marginTop: 4,
+  },
+
+  // --- NEW: MISSING SEARCH & FILTER STYLES ---
+  filterContainer: {
+    marginTop: 20,
+  },
+  searchBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 44,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 8,
+    fontSize: 15,
+    color: "#111827",
+  },
+  sortRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+    gap: 8,
+  },
+  sortLabel: {
+    color: "#eefcf5",
+    fontSize: 13,
+    fontWeight: "600",
+    marginRight: 4,
+  },
+  sortChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  sortChipActive: {
+    backgroundColor: "#ffffff",
+    borderColor: "#ffffff",
+  },
+  sortChipText: {
+    color: "#ffffff",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  sortChipTextActive: {
+    color: "#05943c", // Matches your custom bright green!
+  },
+
+  // --- ADVANCED FILTER MENU STYLES ---
+  advancedFilterBtn: {
+    width: 44,
+    height: 44,
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  advancedFilterBtnActive: {
+    backgroundColor: "#eefcf5",
+    borderWidth: 1,
+    borderColor: "#05943c",
+  },
+  advancedFilterMenu: {
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  filterLabel: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#9ca3af",
+    textTransform: "uppercase",
+    marginBottom: 8,
+    marginTop: 4,
+  },
+  filterScroll: {
+    flexDirection: "row",
+    marginBottom: 12,
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: "#f3f4f6",
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  filterChipActive: {
+    backgroundColor: "#eefcf5",
+    borderColor: "#05943c",
+  },
+  filterChipText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#4b5563",
+  },
+  filterChipTextActive: {
+    color: "#05943c",
+    fontWeight: "800",
+  },
+
+  // --- SCROLL & LIST ITEM STYLES (Your custom scroll tweaks) ---
+  shoppingScroll: {
+    paddingHorizontal: 16,
+    paddingBottom: 100,
+    marginTop: 0, 
+  },
+  shoppingItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  shoppingIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#fef2f2", 
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 16,
+  },
+  shoppingInfo: { flex: 1 },
+  shoppingName: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#111827",
+    marginBottom: 4,
+  },
+  shoppingMeta: {
+    fontSize: 13,
+    color: "#6b7280",
+    fontWeight: "600",
+  },
 });
 

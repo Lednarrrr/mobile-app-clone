@@ -89,17 +89,36 @@ export function getRecipeRecommendations(userIngredients) {
 }
 
 
-export function getShoppingListFromRecommendations(recommendations) {
-  const missing = {};
+export function getShoppingListFromRecommendations(recommendations, userIngredients = []) {
+  // Create a quick lookup set of what the user actually has in their pantry
+  const pantrySet = new Set(userIngredients.map(item => item?.name?.toLowerCase().trim()));
+  const missingData = [];
+
   if (!recommendations || !Array.isArray(recommendations)) return [];
- 
+
   recommendations.forEach(recipe => {
-    // Only generates a shopping list if the user has at least 1 matching item
+    // Only process recipes that are missing ingredients but have at least 1 match
     if (recipe.status === "Missing Ingredients" && recipe.matchCount > 0) {
-      missing[recipe.name] = { name: `Ingredients for ${recipe.name}`, recipeCount: 1 };
+      
+      // Calculate exactly what is missing
+      const missingItems = recipe.ingredients.filter(ing => {
+        const ingName = typeof ing === 'string' ? ing : ing.name;
+        return !pantrySet.has(ingName?.toLowerCase().trim());
+      });
+
+      // If they are missing items, bundle it up for the UI
+      if (missingItems.length > 0) {
+        missingData.push({
+          id: recipe.id || recipe.name,
+          recipeName: recipe.name,
+          category: recipe.category,
+          missingIngredients: missingItems
+        });
+      }
     }
   });
-  return Object.values(missing);
+
+  return missingData;
 }
 
 
