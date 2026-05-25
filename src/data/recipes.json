@@ -588,174 +588,6 @@
     ]
   },
   {
-    "id": "scraped_1779524606305",
-    "name": "Better Beef Nilaga",
-    "category": "Ulam",
-    "prep_time_minutes": 45,
-    "servings": 4,
-    "ingredients": [
-      {
-        "name": "beef neck bone",
-        "quantity": 3,
-        "unit": "lbs.",
-        "substitutable": false
-      },
-      {
-        "name": "knorr beef cube",
-        "quantity": 1,
-        "unit": "pcs",
-        "substitutable": false
-      },
-      {
-        "name": "corn on the cob",
-        "quantity": 3,
-        "unit": "pcs",
-        "substitutable": false
-      },
-      {
-        "name": "potatoes",
-        "quantity": 2,
-        "unit": "pcs",
-        "substitutable": false
-      },
-      {
-        "name": "long green beans",
-        "quantity": 18,
-        "unit": "pcs",
-        "substitutable": false
-      },
-      {
-        "name": "head cabbage",
-        "quantity": 1,
-        "unit": "pcs",
-        "substitutable": false
-      },
-      {
-        "name": "bok choy",
-        "quantity": 1,
-        "unit": "bunch",
-        "substitutable": false
-      },
-      {
-        "name": "water",
-        "quantity": 6,
-        "unit": "cups",
-        "substitutable": false
-      },
-      {
-        "name": "onion",
-        "quantity": 1,
-        "unit": "pcs",
-        "substitutable": false
-      },
-      {
-        "name": "garlic",
-        "quantity": 4,
-        "unit": "cloves",
-        "substitutable": false
-      },
-      {
-        "name": "cooking oil",
-        "quantity": 3,
-        "unit": "tablespoons",
-        "substitutable": false
-      },
-      {
-        "name": "fish sauce and ground black pepper to taste",
-        "quantity": 1,
-        "unit": "pcs",
-        "substitutable": false
-      }
-    ]
-  },
-  {
-    "name": "Sinigang na Baboy with Gabi",
-    "category": "Ulam",
-    "prep_time_minutes": 40,
-    "servings": 6,
-    "ingredients": [
-      {
-        "name": "pork belly",
-        "quantity": 2,
-        "unit": "lbs.",
-        "substitutable": false
-      },
-      {
-        "name": "kangkong leaves",
-        "quantity": 2,
-        "unit": "cups",
-        "substitutable": false
-      },
-      {
-        "name": "long green chili pepper",
-        "quantity": 3,
-        "unit": "pieces",
-        "substitutable": false
-      },
-      {
-        "name": "tomato",
-        "quantity": 2,
-        "unit": "pieces",
-        "substitutable": false
-      },
-      {
-        "name": "daikon radish",
-        "quantity": 1,
-        "unit": "cup",
-        "substitutable": false
-      },
-      {
-        "name": "snake beans",
-        "quantity": 10,
-        "unit": "pieces",
-        "substitutable": false
-      },
-      {
-        "name": "onion",
-        "quantity": 1,
-        "unit": "piece",
-        "substitutable": false
-      },
-      {
-        "name": "okra",
-        "quantity": 15,
-        "unit": "pieces",
-        "substitutable": false
-      },
-      {
-        "name": "taro",
-        "quantity": 2,
-        "unit": "pieces",
-        "substitutable": false
-      },
-      {
-        "name": "water",
-        "quantity": 8,
-        "unit": "cups",
-        "substitutable": false
-      },
-      {
-        "name": "knorr sinigang sa sampaloc mix original",
-        "quantity": 2,
-        "unit": "packs",
-        "substitutable": false
-      },
-      {
-        "name": "fish sauce",
-        "quantity": 3,
-        "unit": "tablespoons",
-        "substitutable": false
-      },
-      {
-        "name": "ground black pepper",
-        "quantity": 1,
-        "unit": "teaspoon",
-        "substitutable": false
-      }
-    ],
-    "id": "scraped_14"
-  },
-  {
     "name": "Garlic Pepper Beef in Mushroom Gravy",
     "category": "Ulam",
     "prep_time_minutes": 40,
@@ -840,7 +672,88 @@
         "substitutable": false
       }
     ],
-    "id": "scraped_15"
+    "id": "scraped_13"
+  },
+  {
+    "name": "Better Beef Nilaga",
+    "category": "Ulam",
+    "prep_time_minutes": 45,
+    "servings": 4,
+    "ingredients": [
+      {
+        "name": "beef neck bone",
+        "quantity": 3,
+        "unit": "lbs.",
+        "substitutable": false
+      },
+      {
+        "name": "knorr beef cube",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "corn on the cob",
+        "quantity": 3,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "potatoes",
+        "quantity": 2,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "long green beans",
+        "quantity": 18,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "head cabbage",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "bok choy",
+        "quantity": 1,
+        "unit": "bunch",
+        "substitutable": false
+      },
+      {
+        "name": "water",
+        "quantity": 6,
+        "unit": "cups",
+        "substitutable": false
+      },
+      {
+        "name": "onion",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      },
+      {
+        "name": "garlic",
+        "quantity": 4,
+        "unit": "cloves",
+        "substitutable": false
+      },
+      {
+        "name": "cooking oil",
+        "quantity": 3,
+        "unit": "tablespoons",
+        "substitutable": false
+      },
+      {
+        "name": "fish sauce and ground black pepper to taste",
+        "quantity": 1,
+        "unit": "pcs",
+        "substitutable": false
+      }
+    ],
+    "id": "scraped_14"
   },
   {
     "name": "Balbacua Recipe",
@@ -945,7 +858,7 @@
         "substitutable": false
       }
     ],
-    "id": "scraped_16"
+    "id": "scraped_15"
   },
   {
     "name": "Japanese Curry Recipe",
@@ -1056,7 +969,7 @@
         "substitutable": false
       }
     ],
-    "id": "scraped_17"
+    "id": "scraped_16"
   },
   {
     "name": "Beef Empanada Recipe",
@@ -1149,7 +1062,7 @@
         "substitutable": false
       }
     ],
-    "id": "scraped_18"
+    "id": "scraped_17"
   },
   {
     "name": "No Bake Macaroni",
@@ -1206,7 +1119,7 @@
         "substitutable": false
       }
     ],
-    "id": "scraped_19"
+    "id": "scraped_18"
   },
   {
     "name": "Loco Moco Recipe",
@@ -1281,7 +1194,7 @@
         "substitutable": false
       }
     ],
-    "id": "scraped_20"
+    "id": "scraped_19"
   },
   {
     "name": "Loaded Nachos Recipe",
@@ -1350,7 +1263,7 @@
         "substitutable": false
       }
     ],
-    "id": "scraped_21"
+    "id": "scraped_20"
   },
   {
     "name": "Pinoy Burger Steak Recipe",
@@ -1425,7 +1338,7 @@
         "substitutable": false
       }
     ],
-    "id": "scraped_22"
+    "id": "scraped_21"
   },
   {
     "name": "Filipino Style Beef Steak",
@@ -1500,6 +1413,6 @@
         "substitutable": false
       }
     ],
-    "id": "scraped_23"
+    "id": "scraped_22"
   }
 ]

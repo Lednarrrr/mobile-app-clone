@@ -29,7 +29,9 @@ import {
   getCustomRecipes,
   addCustomRecipe, // <-- Added for saving custom recipes
 } from "./src/database/inventoryDatabase";
-
+import InventoryScreen from "./src/screens/InventoryScreen";
+import ProfileScreen from "./src/screens/ProfileScreen";
+import RecommendationScreen from "./src/screens/RecommendationScreen";
 import {
   initializeRecommendationEngine,
   appendRecipeToEngine, 
@@ -61,10 +63,11 @@ export default function App() {
   // Modals & Menus
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
-  const [isActionMenuVisible, setIsActionMenuVisible] = useState(false); 
-  const [isAddRecipeModalVisible, setIsAddRecipeModalVisible] = useState(false); 
-  
-  // Ingredient Form States
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const [newItemName, setNewItemName] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [newItemQty, setNewItemQty] = useState("");
@@ -283,19 +286,18 @@ export default function App() {
       return;
     }
 
-    try {
-      addIngredient(
-        cleanedName,
-        newItemQty,
-        newItemUnit,
-        newItemCategory === "Other" ? customCategory : newItemCategory,
-        newItemExpiry,
-      );
-      loadAppData(); 
-      closeAddModal();
-    } catch (error) {
-      console.error("Failed to add ingredient via modal:", error);
-    }
+    addIngredient(
+      newItemName,
+      newItemQty,
+      newItemUnit,
+      newItemCategory === "Other" ? customCategory : newItemCategory,
+      newItemExpiry,
+    );
+    loadIngredients();
+    closeAddModal();
+    setToastMessage(`${newItemName} has been added to your inventory.`);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
   }
 
   // --- CUSTOM RECIPE HANDLERS ---
@@ -397,6 +399,9 @@ export default function App() {
               onGoToInventory={() => setActiveScreen("inventory")}
               onGoToBuy={() => setActiveScreen("buy")}
               onGoToSettings={() => setActiveScreen("settings")}
+              onFilterPress={() => setIsFilterModalOpen(true)}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
             />
           )}
 
@@ -415,6 +420,8 @@ export default function App() {
             <ShoppingList shoppingList={shoppingList} />
           )}
 
+          {activeScreen === "profile" && <ProfileScreen />}
+
           {activeScreen === "settings" && (
             <SettingsPanel
               onResetOnboarding={async () => {
@@ -430,6 +437,13 @@ export default function App() {
           onChangeScreen={setActiveScreen}
           onAddPress={openActionMenu} 
         />
+
+        {showToast && (
+          <View style={styles.toast}>
+            <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
+            <Text style={styles.toastText}>{toastMessage}</Text>
+          </View>
+        )}
       </View>
 
       {/* --- THE ACTION MENU MODAL --- */}
@@ -618,109 +632,114 @@ export default function App() {
         </Animated.View>
       </Modal>
 
-      {/* --- ADD CUSTOM RECIPE MODAL --- */}
       <Modal
-        animationType="slide"
-        transparent={false}
-        visible={isAddRecipeModalVisible}
-        onRequestClose={() => setIsAddRecipeModalVisible(false)}
+        animationType="none"
+        transparent
+        visible={isFilterModalOpen}
+        onRequestClose={() => setIsFilterModalOpen(false)}
       >
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F5EE' }}>
-          <View style={[styles.modalHeaderRow, { paddingHorizontal: 16, paddingTop: 16 }]}>
-            <Pressable style={styles.modalClose} onPress={() => setIsAddRecipeModalVisible(false)}>
-              <Ionicons name="close" size={20} color="#111827" />
-            </Pressable>
-            <Text style={styles.modalTitle}>New Recipe</Text>
-            <View style={styles.modalHeaderSpacer} />
-          </View>
-
-          <ScrollView style={{ paddingHorizontal: 16 }} keyboardShouldPersistTaps="handled">
-            
-            {/* Basic Info */}
-            <Text style={styles.modalFieldLabel}>Recipe Name</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="e.g., Special Kare-Kare"
-              value={newRecipeName}
-              onChangeText={setNewRecipeName}
-            />
-
-            <View style={styles.formRow}>
-              <View style={styles.formColumn}>
-                <Text style={styles.modalFieldLabel}>Prep Time (mins)</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="e.g., 45"
-                  keyboardType="numeric"
-                  value={newRecipePrepTime}
-                  onChangeText={setNewRecipePrepTime}
-                />
+        <Pressable
+          style={styles.modalBackdrop}
+          onPress={() => setIsFilterModalOpen(false)}
+        >
+          <SafeAreaView
+            style={{ backgroundColor: "#ffffff" }}
+            edges={["bottom"]}
+          >
+            <Pressable style={styles.modalSheet}>
+              <View style={styles.modalHandle} />
+              <View style={styles.modalHeaderRow}>
+                <View style={styles.modalHeaderSpacer} />
+                <Text style={styles.modalTitle}>Filter Dishes</Text>
+                <Pressable
+                  style={styles.modalClose}
+                  onPress={() => setIsFilterModalOpen(false)}
+                >
+                  <Ionicons name="close" size={20} color="#111827" />
+                </Pressable>
               </View>
-              <View style={styles.formColumn}>
-                <Text style={styles.modalFieldLabel}>Servings</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="e.g., 4"
-                  keyboardType="numeric"
-                  value={newRecipeServings}
-                  onChangeText={setNewRecipeServings}
-                />
+
+              <View style={styles.modalFieldGroup}>
+                <Text style={styles.modalFieldLabel}>Category</Text>
+                {CATEGORY_OPTIONS.map((category) => {
+                  const isSelected = selectedCategories.includes(category);
+                  return (
+                    <Pressable
+                      key={category}
+                      style={[
+                        styles.filterOption,
+                        isSelected && styles.filterOptionSelected,
+                      ]}
+                      onPress={() => {
+                        setSelectedCategories((prev) =>
+                          isSelected
+                            ? prev.filter((c) => c !== category)
+                            : [...prev, category],
+                        );
+                      }}
+                    >
+                      <Text style={styles.filterOptionText}>{category}</Text>
+                      <View
+                        style={[
+                          styles.checkbox,
+                          isSelected && styles.checkboxChecked,
+                        ]}
+                      >
+                        {isSelected && (
+                          <Ionicons
+                            name="checkmark"
+                            size={14}
+                            color="#ffffff"
+                          />
+                        )}
+                      </View>
+                    </Pressable>
+                  );
+                })}
               </View>
-            </View>
 
-            {/* Dynamic Ingredients Section */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 24, marginBottom: 8 }}>
-              <Text style={[styles.modalFieldLabel, { marginTop: 0, marginBottom: 0 }]}>Ingredients Needed</Text>
-            </View>
-
-            {newRecipeIngredients.map((ingredient, index) => (
-              <View key={index} style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
-                <View style={{ flex: 2 }}>
-                  <TextInput
-                    style={styles.modalInput}
-                    placeholder="Ingredient name"
-                    value={ingredient.name}
-                    onChangeText={(text) => updateRecipeIngredient(index, 'name', text)}
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <TextInput
-                    style={styles.modalInput}
-                    placeholder="Qty"
-                    keyboardType="numeric"
-                    value={ingredient.quantity}
-                    onChangeText={(text) => updateRecipeIngredient(index, 'quantity', text)}
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <TextInput
-                    style={styles.modalInput}
-                    placeholder="Unit"
-                    value={ingredient.unit}
-                    onChangeText={(text) => updateRecipeIngredient(index, 'unit', text)}
-                  />
-                </View>
-              </View>
-            ))}
-
-            {/* Add Row Button */}
-            <Pressable 
-              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, borderStyle: 'dashed', borderWidth: 1, borderColor: '#9ca3af', borderRadius: 12, marginBottom: 24 }} 
-              onPress={addRecipeIngredientRow}
-            >
-              <Ionicons name="add" size={18} color="#4b5563" />
-              <Text style={{ color: '#4b5563', fontWeight: '600', marginLeft: 4 }}>Add another ingredient</Text>
+              <Pressable
+                style={styles.modalPrimaryButton}
+                onPress={() => setIsFilterModalOpen(false)}
+              >
+                <Text style={styles.modalPrimaryText}>Apply Filters</Text>
+              </Pressable>
             </Pressable>
-
-            {/* Save Button */}
-            <Pressable style={[styles.modalPrimaryButton, { marginBottom: 40 }]} onPress={handleSaveCustomRecipe}>
-              <Text style={styles.modalPrimaryText}>Save Recipe to Cookbook</Text>
-            </Pressable>
-          </ScrollView>
-        </SafeAreaView>
+          </SafeAreaView>
+        </Pressable>
       </Modal>
-
     </SafeAreaView>
+  );
+}
+
+function SettingsPanel({ onResetOnboarding }) {
+  return (
+    <ScrollView
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.sectionHeader}>
+        <Text style={styles.screenTitle}>Settings</Text>
+        <Text style={styles.screenSubtitle}>
+          MVP controls for privacy, offline data, and future app preferences.
+        </Text>
+      </View>
+
+      <View style={styles.settingsCard}>
+        <Ionicons name="shield-checkmark-outline" size={28} color="#2D6A4F" />
+        <View style={styles.settingsTextGroup}>
+          <Text style={styles.settingsTitle}>Offline-first prototype</Text>
+          <Text style={styles.settingsText}>
+            Inventory data is stored locally on this device for the MVP.
+          </Text>
+        </View>
+      </View>
+
+      <Pressable style={styles.settingsAction} onPress={onResetOnboarding}>
+        <Ionicons name="refresh-outline" size={22} color="#C77B12" />
+        <Text style={styles.settingsActionText}>Show onboarding again</Text>
+      </Pressable>
+    </ScrollView>
   );
 }
 
@@ -747,30 +766,6 @@ function ShoppingList({ shoppingList }) {
           </View>
         ))
       )}
-    </ScrollView>
-  );
-}
-
-function SettingsPanel({ onResetOnboarding }) {
-  return (
-    <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.screenTitle}>Settings</Text>
-        <Text style={styles.screenSubtitle}>MVP controls for privacy, offline data, and future app preferences.</Text>
-      </View>
-
-      <View style={styles.settingsCard}>
-        <Ionicons name="shield-checkmark-outline" size={28} color="#2D6A4F" />
-        <View style={styles.settingsTextGroup}>
-          <Text style={styles.settingsTitle}>Offline-first prototype</Text>
-          <Text style={styles.settingsText}>Inventory data is stored locally on this device for the MVP.</Text>
-        </View>
-      </View>
-
-      <Pressable style={styles.settingsAction} onPress={onResetOnboarding}>
-        <Ionicons name="refresh-outline" size={22} color="#C77B12" />
-        <Text style={styles.settingsActionText}>Show onboarding again</Text>
-      </Pressable>
     </ScrollView>
   );
 }
@@ -827,10 +822,150 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     maxHeight: 220, 
   },
-  suggestionTitle: {
+  loadingScreen: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    padding: 24,
+  },
+  loadingTitle: {
+    color: "#1c2a22",
+    fontSize: 34,
+    fontWeight: "900",
+  },
+  loadingText: {
+    color: "#69746c",
+    fontSize: 15,
+    marginTop: 8,
+  },
+  container: {
+    backgroundColor: "#F8F5EE",
+    flex: 1,
+    paddingHorizontal: 0,
+    paddingTop: 0,
+  },
+  content: {
+    flex: 1,
+    marginTop: 0,
+  },
+  scrollContent: {
+    paddingBottom: 120,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+  },
+  sectionHeader: {
+    marginBottom: 16,
+  },
+  screenTitle: {
+    color: "#111827",
+    fontSize: 22,
+    fontWeight: "900",
+  },
+  screenSubtitle: {
+    color: "#6b7280",
+    fontSize: 13,
+    marginTop: 6,
+  },
+  settingsCard: {
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderColor: "#e5e7eb",
+    borderRadius: 16,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    padding: 16,
+  },
+  settingsTextGroup: {
+    flex: 1,
+  },
+  settingsTitle: {
+    color: "#111827",
+    fontSize: 15,
+    fontWeight: "800",
+  },
+  settingsText: {
+    color: "#6b7280",
+    fontSize: 13,
+    marginTop: 4,
+  },
+  settingsAction: {
+    alignItems: "center",
+    backgroundColor: "#fff7ed",
+    borderColor: "#fed7aa",
+    borderRadius: 14,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  settingsActionText: {
+    color: "#9a3412",
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  shoppingItem: {
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderColor: "#e5e7eb",
+    borderRadius: 16,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 12,
+    padding: 14,
+  },
+  shoppingIcon: {
+    alignItems: "center",
+    backgroundColor: "#e8f3ee",
+    borderRadius: 999,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
+  },
+  shoppingInfo: {
+    flex: 1,
+  },
+  shoppingName: {
+    color: "#111827",
+    fontSize: 15,
+    fontWeight: "800",
+  },
+  shoppingMeta: {
+    color: "#6b7280",
     fontSize: 12,
-    fontWeight: '800',
-    color: '#9ca3af',
+    marginTop: 4,
+  },
+  emptyPanel: {
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderColor: "#e5e7eb",
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 18,
+  },
+  emptyTitle: {
+    color: "#111827",
+    fontSize: 15,
+    fontWeight: "800",
+  },
+  emptyText: {
+    color: "#6b7280",
+    fontSize: 12,
+    marginTop: 6,
+    textAlign: "center",
+  },
+  modalBackdrop: {
+    backgroundColor: "rgba(17, 24, 39, 0.35)",
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  modalSheet: {
+    backgroundColor: "#ffffff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 4,
@@ -850,9 +985,221 @@ const styles = StyleSheet.create({
     fontWeight: '600', 
     textTransform: 'capitalize' 
   },
-
-  actionMenuButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f9fafb', padding: 16, borderRadius: 16, marginBottom: 12, borderWidth: 1, borderColor: '#e5e7eb' },
-  actionMenuIconWrap: { width: 48, height: 48, borderRadius: 12, backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'center', marginRight: 16, shadowColor: '#000', shadowOpacity: 0.05, shadowOffset: { width: 0, height: 2 }, shadowRadius: 4, elevation: 2 },
-  actionMenuTitle: { fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 2 },
-  actionMenuSubtitle: { fontSize: 13, color: '#6b7280' },
+  modalTitle: {
+    color: "#111827",
+    fontSize: 18,
+    fontWeight: "900",
+    textAlign: "center",
+    flex: 1,
+  },
+  modalHeaderSpacer: {
+    height: 32,
+    width: 32,
+  },
+  modalClose: {
+    alignItems: "center",
+    backgroundColor: "#f3f4f6",
+    borderRadius: 999,
+    height: 32,
+    justifyContent: "center",
+    width: 32,
+  },
+  modalFieldLabel: {
+    color: "#6b7280",
+    fontSize: 12,
+    fontWeight: "800",
+    marginBottom: 6,
+    marginTop: 12,
+  },
+  matchRow: {
+    alignItems: "center",
+    backgroundColor: "#e8f8ee",
+    borderRadius: 999,
+    flexDirection: "row",
+    gap: 6,
+    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  matchText: {
+    color: "#16a34a",
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  formRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 8,
+  },
+  formColumn: {
+    flex: 1,
+  },
+  dropdownField: {
+    position: "relative",
+  },
+  selectRow: {
+    alignItems: "center",
+    borderColor: "#e5e7eb",
+    borderRadius: 14,
+    borderWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  selectText: {
+    color: "#111827",
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  selectMenu: {
+    backgroundColor: "#ffffff",
+    borderColor: "#e5e7eb",
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 6,
+    paddingVertical: 4,
+    position: "absolute",
+    top: 48,
+    left: 0,
+    right: 0,
+    shadowColor: "#111827",
+    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 16,
+    elevation: 6,
+    zIndex: 10,
+  },
+  selectMenuScroll: {
+    maxHeight: 160,
+  },
+  selectOption: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  selectOptionText: {
+    color: "#111827",
+    fontSize: 13,
+    fontWeight: "500",
+  },
+  modalInput: {
+    borderColor: "#e5e7eb",
+    borderRadius: 14,
+    borderWidth: 1,
+    color: "#111827",
+    fontSize: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  expiryRow: {
+    alignItems: "center",
+    borderColor: "#e5e7eb",
+    borderRadius: 14,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  expiryText: {
+    color: "#111827",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  expiryPlaceholder: {
+    color: "#9ca3af",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  expiryPickerWrap: {
+    backgroundColor: "#ffffff",
+    borderColor: "#e5e7eb",
+    borderRadius: 14,
+    borderWidth: 1,
+    marginTop: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 6,
+  },
+  expiryDone: {
+    alignItems: "center",
+    borderRadius: 12,
+    marginTop: 8,
+    paddingVertical: 8,
+  },
+  expiryDoneText: {
+    color: "#111827",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  modalPrimaryButton: {
+    alignItems: "center",
+    backgroundColor: "#d4a20b",
+    borderRadius: 16,
+    marginTop: 18,
+    paddingVertical: 14,
+  },
+  modalPrimaryText: {
+    color: "#ffffff",
+    fontSize: 15,
+    fontWeight: "900",
+  },
+  filterOption: {
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderColor: "#e5e7eb",
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  filterOptionSelected: {
+    borderColor: "#2D6A4F",
+    backgroundColor: "#f0fdf4",
+  },
+  filterOptionText: {
+    color: "#111827",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  checkbox: {
+    alignItems: "center",
+    backgroundColor: "#e5e7eb",
+    borderRadius: 6,
+    height: 22,
+    justifyContent: "center",
+    width: 22,
+  },
+  checkboxChecked: {
+    backgroundColor: "#2D6A4F",
+  },
+  toast: {
+    position: "absolute",
+    top: 20,
+    left: 16,
+    right: 16,
+    backgroundColor: "#E9C46A",
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    shadowColor: "#111827",
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
+    elevation: 4,
+    zIndex: 100,
+  },
+  toastText: {
+    color: "#111827",
+    fontSize: 14,
+    fontWeight: "600",
+    flex: 1,
+  },
 });
